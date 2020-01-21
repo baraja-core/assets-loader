@@ -1,0 +1,22 @@
+{
+	"name": "baraja-core/assets-loader",
+	"description": "Smart asset loader for Nette framework.",
+	"homepage": "https://github.com/baraja-core/assets-loader",
+	"authors": [
+		{
+			"name": "Jan Barášek",
+			"homepage": "https://baraja.cz"
+		}
+	],
+	"require": {
+		"php": ">=7.1.0",
+		"nette/di": "^3.0",
+		"nette/http": "^3.0"
+	},
+	"autoload": {
+		"classmap": [
+			"src/"
+		]
+	},
+	"minimum-stability": "stable"
+}

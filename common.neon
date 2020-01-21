@@ -1,0 +1,10 @@
+extensions:
+	assetsLoader: Baraja\AssetsLoader\LoaderExtension
+
+services:
+	- Baraja\AssetsLoader\Api(%wwwDir%)
+
+assetsLoader:
+	routing:
+		'Front:Test:detail':
+			- test.js
