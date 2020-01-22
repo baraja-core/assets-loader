@@ -86,7 +86,7 @@ final class Api
 				header('Content-Type: ' . self::$formatHeaders[$routeParser['format']]);
 			}
 
-			echo 'Automatically generated ' . date('Y-m-d H:i:s') . "\n\n";
+			echo '/* Automatically generated ' . date('Y-m-d H:i:s') . ' */' . "\n\n";
 
 			foreach ($data[$routeParser['format']] ?? [] as $file) {
 				echo '/* ' . $file . ' */' . "\n";
