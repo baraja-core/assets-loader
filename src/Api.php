@@ -64,7 +64,12 @@ final class Api
 		$return = [];
 		$routePath = Helpers::formatRouteToPath($route = trim($route, ':'));
 
-		foreach (array_keys($this->getData($route)) as $format) {
+		foreach (array_keys($data = $this->getData($route)) as $format) {
+			foreach ($data[$format] ?? [] as $item) {
+				if (preg_match('/^((?:https?\:)?\/\/)(.+)$/', $item, $itemParser)) {
+					$return[] = str_replace('%path%', ($itemParser[1] === '//' ? 'https://' : '') . $itemParser[2], self::$formatHtmlInjects[$format]);
+				}
+			}
 			if (isset(self::$formatHtmlInjects[$format]) === true) {
 				$return[] = str_replace('%path%', Helpers::getBaseUrl() . '/assets/web-loader/' . $routePath . '.' . $format, self::$formatHtmlInjects[$format]);
 			}
