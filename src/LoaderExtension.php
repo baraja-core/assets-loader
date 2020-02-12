@@ -20,8 +20,13 @@ class LoaderExtension extends CompilerExtension
 	public function afterCompile(ClassType $class): void
 	{
 		$assets = [];
+		$files = $this->getConfig()['routing'] ?? [];
 
-		foreach ($this->getConfig()['routing'] as $route => $assetFiles) {
+		if (isset($this->getConfig()['base']) === true) {
+			$files = array_merge($files, ['base' => $this->getConfig()['base']]);
+		}
+
+		foreach ($files as $route => $assetFiles) {
 			foreach ($assetFiles as $assetFile) {
 				if (preg_match('/^(?<name>.+)\.(?<format>[a-zA-Z0-9]+)$/', $assetFile, $fileParser)) {
 					if (isset($assets[$route][$fileParser['format']]) === false) {
@@ -40,7 +45,9 @@ class LoaderExtension extends CompilerExtension
 
 		$class->addMethod('getBarajaAssetsLoader')
 			->setReturnType('array')
-			->setBody('return $route === null ? ($this->' . self::PROPERTY_NAME . ' ?? []) : ($this->' . self::PROPERTY_NAME . '[$route] ?? []);')
+			->setBody('return $route === null '
+				. '? $this->' . self::PROPERTY_NAME . ' '
+				. ': array_merge($this->' . self::PROPERTY_NAME . '[$route] ?? [], $this->' . self::PROPERTY_NAME . '[\'base\'] ?? []);')
 			->addParameter('route', null)
 			->setType('string')
 			->setNullable(true);
