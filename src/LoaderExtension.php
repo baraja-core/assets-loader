@@ -47,7 +47,7 @@ class LoaderExtension extends CompilerExtension
 			->setReturnType('array')
 			->setBody('return $route === null '
 				. '? $this->' . self::PROPERTY_NAME . ' '
-				. ': array_merge($this->' . self::PROPERTY_NAME . '[$route] ?? [], $this->' . self::PROPERTY_NAME . '[\'base\'] ?? []);')
+				. ': array_merge_recursive($this->' . self::PROPERTY_NAME . '[$route] ?? [], $this->' . self::PROPERTY_NAME . '[\'base\'] ?? []);')
 			->addParameter('route', null)
 			->setType('string')
 			->setNullable(true);
