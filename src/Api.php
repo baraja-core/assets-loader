@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Baraja\AssetsLoader;
 
 
-use Nette\DI\Container;
-
 final class Api
 {
 
@@ -32,18 +30,16 @@ final class Api
 	private $wwwDir;
 
 	/**
-	 * @var Container
+	 * @var mixed[]|null
 	 */
-	private $container;
+	private $data;
 
 	/**
 	 * @param string $wwwDir
-	 * @param Container $container
 	 */
-	public function __construct(string $wwwDir, Container $container)
+	public function __construct(string $wwwDir)
 	{
 		$this->wwwDir = $wwwDir;
-		$this->container = $container;
 	}
 
 	/**
@@ -52,7 +48,7 @@ final class Api
 	 */
 	public function isAssetsAvailable(string $route): bool
 	{
-		return $this->getData(trim($route, ':')) !== [];
+		return $this->findData(trim($route, ':')) !== [];
 	}
 
 	/**
@@ -64,7 +60,7 @@ final class Api
 		$return = [];
 		$routePath = Helpers::formatRouteToPath($route = trim($route, ':'));
 
-		foreach (array_keys($data = $this->getData($route)) as $format) {
+		foreach (array_keys($data = $this->findData($route)) as $format) {
 			foreach ($data[$format] ?? [] as $item) {
 				if (preg_match('/^((?:https?\:)?\/\/)(.+)$/', $item, $itemParser)) {
 					$return[] = str_replace('%path%', ($itemParser[1] === '//' ? 'https://' : '') . $itemParser[2], self::$formatHtmlInjects[$format]);
@@ -85,7 +81,7 @@ final class Api
 	{
 		if (preg_match('/^assets\/web-loader\/(.+)$/', $path, $parser)
 			&& preg_match('/^(?<module>[a-zA-Z0-9]+)-(?<presenter>[a-zA-Z0-9]+)-(?<action>[a-zA-Z0-9]+)\.(?<format>[a-zA-Z0-9]+)$/', $parser[1], $routeParser)
-			&& ($data = $this->getData(Helpers::formatRoute($routeParser['module'], $routeParser['presenter'], $routeParser['action']))) !== []
+			&& ($data = $this->findData(Helpers::formatRoute($routeParser['module'], $routeParser['presenter'], $routeParser['action']))) !== []
 		) {
 			if (isset(self::$formatHeaders[$routeParser['format']]) === true) {
 				header('Content-Type: ' . self::$formatHeaders[$routeParser['format']]);
@@ -109,14 +105,45 @@ final class Api
 	}
 
 	/**
+	 * @internal used by DIC.
+	 * @param mixed[] $data
+	 */
+	public function setData(array $data): void
+	{
+		$this->data = $data;
+	}
+
+	/**
 	 * @param string|null $route
 	 * @return string[]|string[][]
 	 */
-	private function getData(?string $route = null): array
+	private function findData(?string $route = null): array
 	{
-		return \method_exists($this->container, 'getBarajaAssetsLoader')
-			? $this->container->getBarajaAssetsLoader($route)
-			: [];
+		if ($this->data === null) {
+			AssetLoaderException::dataIsEmpty();
+		}
+
+		if ($route !== null) {
+			$selectors = [];
+
+			if (preg_match('/^([^:]+):([^:]+):([^:]+)$/', trim($route, ':'), $routeParser)) {
+				$selectors[] = '*';
+				$selectors[] = $routeParser[1] . ':*';
+				$selectors[] = $routeParser[1] . ':' . $routeParser[2] . ':*';
+				$selectors[] = $routeParser[1] . ':' . $routeParser[2] . ':' . $routeParser[3];
+			} else {
+				AssetLoaderException::routeIsInInvalidFormat($route);
+			}
+
+			$return = [];
+			foreach ($selectors as $selector) {
+				$return[] = $this->data[$selector] ?? [];
+			}
+
+			return array_merge_recursive([], ...$return);
+		}
+
+		return $this->data;
 	}
 
 }

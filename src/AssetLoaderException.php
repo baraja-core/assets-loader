@@ -16,4 +16,21 @@ final class AssetLoaderException extends \RuntimeException
 		throw new self('Invalid asset filename "' . $name . '". Did you mean "' . $name . '.js"?');
 	}
 
+	public static function dataIsEmpty(): void
+	{
+		throw new self('Data is empty. Did you registered "LoaderExtension" in Neon?');
+	}
+
+	/**
+	 * @param string $route
+	 */
+	public static function routeIsInInvalidFormat(string $route): void
+	{
+		throw new self(
+			'Route "' . $route . '" is invalid. '
+			. 'Route must be absolute "Module:Presenter:action" or end '
+			. 'with dynamic part in format "Module:*" or "Module:Presenter:*".'
+		);
+	}
+
 }
