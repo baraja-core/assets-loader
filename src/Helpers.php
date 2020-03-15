@@ -117,22 +117,18 @@ final class Helpers
 	{
 		static $return;
 
-		if ($return !== null) {
-			return $return;
-		}
-
-		$currentUrl = self::getCurrentUrl();
-
-		if ($currentUrl !== null) {
-			if (preg_match('/^(https?:\/\/.+)\/www\//', $currentUrl, $localUrlParser)) {
-				$return = $localUrlParser[0];
-			} elseif (preg_match('/^(https?:\/\/[^\/]+)/', $currentUrl, $publicUrlParser)) {
-				$return = $publicUrlParser[1];
+		if ($return === null) {
+			if (($currentUrl = self::getCurrentUrl()) !== null) {
+				if (preg_match('/^(https?:\/\/.+)\/www\//', $currentUrl, $localUrlParser)) {
+					$return = $localUrlParser[0];
+				} elseif (preg_match('/^(https?:\/\/[^\/]+)/', $currentUrl, $publicUrlParser)) {
+					$return = $publicUrlParser[1];
+				}
 			}
-		}
 
-		if ($return !== null) {
-			$return = rtrim($return, '/');
+			if ($return !== null) {
+				$return = rtrim($return, '/');
+			}
 		}
 
 		return $return;
