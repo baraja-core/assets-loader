@@ -81,23 +81,27 @@ final class Api
 	{
 		if (preg_match('/^assets\/web-loader\/(.+)$/', $path, $parser)
 			&& preg_match('/^(?<module>[a-zA-Z0-9]+)-(?<presenter>[a-zA-Z0-9]+)-(?<action>[a-zA-Z0-9]+)\.(?<format>[a-zA-Z0-9]+)$/', $parser[1], $routeParser)
-			&& ($data = $this->findData(Helpers::formatRoute($routeParser['module'], $routeParser['presenter'], $routeParser['action']))) !== []
 		) {
 			if (isset(self::$formatHeaders[$routeParser['format']]) === true) {
 				header('Content-Type: ' . self::$formatHeaders[$routeParser['format']]);
+			} else {
+				throw new \RuntimeException(
+					'Content type for format "' . $routeParser['format'] . '" does not exist. '
+					. 'Did you mean "' . implode('", "', array_keys(self::$formatHeaders)) . '"?'
+				);
 			}
 
-			echo '/* Automatically generated ' . date('Y-m-d H:i:s') . ' */' . "\n\n";
-
-			foreach ($data[$routeParser['format']] ?? [] as $file) {
-				echo '/* ' . $file . ' */' . "\n";
-				if (is_file($path = $this->wwwDir . '/assets/' . trim($file, '/')) === true) {
-					echo file_get_contents($path);
+			echo '/* Path "' . htmlspecialchars($path) . '" was automatically generated ' . date('Y-m-d H:i:s') . ' */' . "\n\n";
+			if (($data = $this->findData(Helpers::formatRoute($routeParser['module'], $routeParser['presenter'], $routeParser['action']))) !== []) {
+				foreach ($data[$routeParser['format']] ?? [] as $file) {
+					echo '/* ' . $file . ' */' . "\n";
+					if (is_file($path = $this->wwwDir . '/assets/' . trim($file, '/')) === true) {
+						echo file_get_contents($path);
+					}
+					echo "\n\n";
 				}
-
-				echo "\n\n";
+				die;
 			}
-			die;
 		}
 
 		echo '/* empty body */';
