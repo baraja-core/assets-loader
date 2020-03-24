@@ -18,6 +18,7 @@ final class Helpers
 		throw new \Error('Class ' . get_class($this) . ' is static and cannot be instantiated.');
 	}
 
+
 	/**
 	 * Return current API path by current HTTP URL.
 	 * In case of CLI return empty string.
@@ -29,6 +30,7 @@ final class Helpers
 	{
 		return trim(str_replace(rtrim($httpRequest->getUrl()->withoutUserInfo()->getBaseUrl(), '/'), '', (string) self::getCurrentUrl()), '/');
 	}
+
 
 	/**
 	 * Return current absolute URL.
@@ -46,6 +48,7 @@ final class Helpers
 			. '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 	}
 
+
 	/**
 	 * @param string $module
 	 * @param string $presenter
@@ -56,6 +59,7 @@ final class Helpers
 	{
 		return self::firstUpper($module) . ':' . self::firstUpper($presenter) . ':' . $action;
 	}
+
 
 	/**
 	 * @param string $route
@@ -69,6 +73,7 @@ final class Helpers
 
 		return null;
 	}
+
 
 	/**
 	 * Converts first character to lower case.
@@ -84,6 +89,7 @@ final class Helpers
 			);
 	}
 
+
 	/**
 	 * Converts first character to lower case.
 	 *
@@ -98,6 +104,7 @@ final class Helpers
 			);
 	}
 
+
 	/**
 	 * Returns number of characters (not bytes) in UTF-8 string.
 	 * That is the number of Unicode code points which may differ from the number of graphemes.
@@ -109,6 +116,7 @@ final class Helpers
 	{
 		return function_exists('mb_strlen') ? mb_strlen($s, 'UTF-8') : strlen(utf8_decode($s));
 	}
+
 
 	/**
 	 * @return string|null
@@ -133,5 +141,4 @@ final class Helpers
 
 		return $return;
 	}
-
 }

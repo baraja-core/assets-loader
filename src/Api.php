@@ -8,31 +8,24 @@ namespace Baraja\AssetsLoader;
 final class Api
 {
 
-	/**
-	 * @var string[]
-	 */
+	/** @var string[] */
 	private static $formatHeaders = [
 		'js' => 'application/json',
 		'css' => 'text/css',
 	];
 
-	/**
-	 * @var string[]
-	 */
+	/** @var string[] */
 	private static $formatHtmlInjects = [
 		'js' => '<script src="%path%"></script>',
 		'css' => '<link href="%path%" rel="stylesheet">',
 	];
 
-	/**
-	 * @var string
-	 */
+	/** @var string */
 	private $wwwDir;
 
-	/**
-	 * @var mixed[]|null
-	 */
+	/** @var mixed[]|null */
 	private $data;
+
 
 	/**
 	 * @param string $wwwDir
@@ -42,6 +35,7 @@ final class Api
 		$this->wwwDir = $wwwDir;
 	}
 
+
 	/**
 	 * @param string $route
 	 * @return bool
@@ -50,6 +44,7 @@ final class Api
 	{
 		return $this->findData(trim($route, ':')) !== [];
 	}
+
 
 	/**
 	 * @param string $route
@@ -73,6 +68,7 @@ final class Api
 
 		return implode("\n", $return);
 	}
+
 
 	/**
 	 * @param string $path
@@ -108,6 +104,7 @@ final class Api
 		die;
 	}
 
+
 	/**
 	 * @internal used by DIC.
 	 * @param mixed[] $data
@@ -116,6 +113,7 @@ final class Api
 	{
 		$this->data = $data;
 	}
+
 
 	/**
 	 * @param string|null $route
@@ -149,5 +147,4 @@ final class Api
 
 		return $this->data;
 	}
-
 }
