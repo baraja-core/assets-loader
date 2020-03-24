@@ -12,7 +12,6 @@ use Nette\PhpGenerator\ClassType;
 
 final class LoaderExtension extends CompilerExtension
 {
-
 	public function beforeCompile(): void
 	{
 		$assets = [];
@@ -42,6 +41,7 @@ final class LoaderExtension extends CompilerExtension
 		$definition->addSetup('?->setData(?)', ['@self', $assets]);
 	}
 
+
 	/**
 	 * @param ClassType $class
 	 */
@@ -56,6 +56,7 @@ final class LoaderExtension extends CompilerExtension
 		);
 	}
 
+
 	/**
 	 * @param string $route
 	 */
@@ -69,5 +70,4 @@ final class LoaderExtension extends CompilerExtension
 			AssetLoaderException::routeIsInInvalidFormat($route);
 		}
 	}
-
 }
