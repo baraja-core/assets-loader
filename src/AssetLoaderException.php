@@ -7,10 +7,6 @@ namespace Baraja\AssetsLoader;
 
 final class AssetLoaderException extends \RuntimeException
 {
-
-	/**
-	 * @param string $name
-	 */
 	public static function invalidFileName(string $name): void
 	{
 		throw new self('Invalid asset filename "' . $name . '". Did you mean "' . $name . '.js"?');
@@ -23,9 +19,6 @@ final class AssetLoaderException extends \RuntimeException
 	}
 
 
-	/**
-	 * @param string $route
-	 */
 	public static function routeIsInInvalidFormat(string $route): void
 	{
 		throw new self(

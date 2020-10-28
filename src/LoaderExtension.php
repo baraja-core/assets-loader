@@ -42,9 +42,6 @@ final class LoaderExtension extends CompilerExtension
 	}
 
 
-	/**
-	 * @param ClassType $class
-	 */
 	public function afterCompile(ClassType $class): void
 	{
 		$class->getMethod('initialize')->addBody(
@@ -57,15 +54,11 @@ final class LoaderExtension extends CompilerExtension
 	}
 
 
-	/**
-	 * @param string $route
-	 */
 	private function validateRouteFormat(string $route): void
 	{
 		if ($route === '*') { // special case for global assets
 			return;
 		}
-
 		if (preg_match('/^[A-Z0-9][A-Za-z0-9]*:(?:\*|[A-Z0-9][A-Za-z0-9]*:(?:\*|[a-z0-9][A-Za-z0-9]*))$/', trim($route, ':')) === 0) {
 			AssetLoaderException::routeIsInInvalidFormat($route);
 		}
