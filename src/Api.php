@@ -7,54 +7,41 @@ namespace Baraja\AssetsLoader;
 
 final class Api
 {
-
 	/** @var string[] */
-	private static $formatHeaders = [
+	private static array $formatHeaders = [
 		'js' => 'application/json',
 		'css' => 'text/css',
 	];
 
 	/** @var string[] */
-	private static $formatHtmlInjects = [
+	private static array $formatHtmlInjects = [
 		'js' => '<script src="%path%"></script>',
 		'css' => '<link href="%path%" rel="stylesheet">',
 	];
 
-	/** @var string */
-	private $wwwDir;
+	private string $wwwDir;
 
 	/** @var mixed[]|null */
-	private $data;
+	private ?array $data;
 
 
-	/**
-	 * @param string $wwwDir
-	 */
 	public function __construct(string $wwwDir)
 	{
 		$this->wwwDir = $wwwDir;
 	}
 
 
-	/**
-	 * @param string $route
-	 * @return bool
-	 */
 	public function isAssetsAvailable(string $route): bool
 	{
 		return $this->findData(trim($route, ':')) !== [];
 	}
 
 
-	/**
-	 * @param string $route
-	 * @return string
-	 */
 	public function getHtmlInit(string $route): string
 	{
-		$return = [];
 		$routePath = Helpers::formatRouteToPath($route = trim($route, ':'));
 
+		$return = [];
 		foreach (array_keys($data = $this->findData($route)) as $format) {
 			foreach ($data[$format] ?? [] as $item) {
 				if (preg_match('/^((?:https?\:)?\/\/)(.+)$/', $item, $itemParser)) {
@@ -70,9 +57,6 @@ final class Api
 	}
 
 
-	/**
-	 * @param string $path
-	 */
 	public function run(string $path): void
 	{
 		if (preg_match('/^assets\/web-loader\/(.+)$/', $path, $parser)
@@ -106,8 +90,8 @@ final class Api
 
 
 	/**
-	 * @internal used by DIC.
 	 * @param mixed[] $data
+	 * @internal used by DIC.
 	 */
 	public function setData(array $data): void
 	{
@@ -116,7 +100,6 @@ final class Api
 
 
 	/**
-	 * @param string|null $route
 	 * @return string[]|string[][]
 	 */
 	private function findData(?string $route = null): array
@@ -124,10 +107,8 @@ final class Api
 		if ($this->data === null) {
 			AssetLoaderException::dataIsEmpty();
 		}
-
 		if ($route !== null) {
 			$selectors = [];
-
 			if (preg_match('/^([^:]+):([^:]+):([^:]+)$/', trim($route, ':'), $routeParser)) {
 				$selectors[] = '*';
 				$selectors[] = $routeParser[1] . ':*';

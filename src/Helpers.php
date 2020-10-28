@@ -10,9 +10,7 @@ use Nette\Http\Request;
 final class Helpers
 {
 
-	/**
-	 * @throws \Error
-	 */
+	/** @throws \Error */
 	public function __construct()
 	{
 		throw new \Error('Class ' . get_class($this) . ' is static and cannot be instantiated.');
@@ -22,9 +20,6 @@ final class Helpers
 	/**
 	 * Return current API path by current HTTP URL.
 	 * In case of CLI return empty string.
-	 *
-	 * @param Request $httpRequest
-	 * @return string
 	 */
 	public static function processPath(Request $httpRequest): string
 	{
@@ -35,8 +30,6 @@ final class Helpers
 	/**
 	 * Return current absolute URL.
 	 * Return null, if current URL does not exist (for example in CLI mode).
-	 *
-	 * @return string|null
 	 */
 	public static function getCurrentUrl(): ?string
 	{
@@ -49,22 +42,12 @@ final class Helpers
 	}
 
 
-	/**
-	 * @param string $module
-	 * @param string $presenter
-	 * @param string $action
-	 * @return string
-	 */
 	public static function formatRoute(string $module, string $presenter = 'Homepage', string $action = 'default'): string
 	{
 		return self::firstUpper($module) . ':' . self::firstUpper($presenter) . ':' . $action;
 	}
 
 
-	/**
-	 * @param string $route
-	 * @return string|null
-	 */
 	public static function formatRouteToPath(string $route): ?string
 	{
 		if (preg_match('/^(?<module>[^:]+):(?<presenter>[^:]+):(?<action>[^:]+)$/', $route, $parser)) {
@@ -75,12 +58,6 @@ final class Helpers
 	}
 
 
-	/**
-	 * Converts first character to lower case.
-	 *
-	 * @param string $s
-	 * @return string
-	 */
 	public static function firstUpper(string $s): string
 	{
 		return strtoupper($s[0] ?? '') . (function_exists('mb_substr')
@@ -90,12 +67,6 @@ final class Helpers
 	}
 
 
-	/**
-	 * Converts first character to lower case.
-	 *
-	 * @param string $s
-	 * @return string
-	 */
 	public static function firstLower(string $s): string
 	{
 		return strtolower($s[0] ?? '') . (function_exists('mb_substr')
@@ -108,9 +79,6 @@ final class Helpers
 	/**
 	 * Returns number of characters (not bytes) in UTF-8 string.
 	 * That is the number of Unicode code points which may differ from the number of graphemes.
-	 *
-	 * @param string $s
-	 * @return int
 	 */
 	public static function length(string $s): int
 	{
@@ -118,13 +86,9 @@ final class Helpers
 	}
 
 
-	/**
-	 * @return string|null
-	 */
 	public static function getBaseUrl(): ?string
 	{
 		static $return;
-
 		if ($return === null) {
 			if (($currentUrl = self::getCurrentUrl()) !== null) {
 				if (preg_match('/^(https?:\/\/.+)\/www\//', $currentUrl, $localUrlParser)) {
@@ -133,7 +97,6 @@ final class Helpers
 					$return = $publicUrlParser[1];
 				}
 			}
-
 			if ($return !== null) {
 				$return = rtrim($return, '/');
 			}
