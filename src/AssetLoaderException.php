@@ -7,18 +7,6 @@ namespace Baraja\AssetsLoader;
 
 final class AssetLoaderException extends \RuntimeException
 {
-	public static function invalidFileName(string $name): void
-	{
-		throw new self('Invalid asset filename "' . $name . '". Did you mean "' . $name . '.js"?');
-	}
-
-
-	public static function dataIsEmpty(): void
-	{
-		throw new self('Data is empty. Did you registered "LoaderExtension" in Neon?');
-	}
-
-
 	public static function routeIsInInvalidFormat(string $route): void
 	{
 		throw new self(

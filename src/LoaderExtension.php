@@ -7,20 +7,35 @@ namespace Baraja\AssetsLoader;
 
 use Nette\Application\Application;
 use Nette\DI\CompilerExtension;
-use Nette\DI\Definitions\ServiceDefinition;
 use Nette\PhpGenerator\ClassType;
+use Nette\Schema\Expect;
+use Nette\Schema\Schema;
 
 final class LoaderExtension extends CompilerExtension
 {
+	public function getConfigSchema(): Schema
+	{
+		return Expect::structure([
+			'basePath' => Expect::string(),
+			'routing' => Expect::arrayOf(Expect::arrayOf(Expect::string()->required())),
+			'base' => Expect::array(),
+			'formatHeaders' => Expect::arrayOf(Expect::string()->required()), // 'css' => 'text/css'
+			'formatHtmlInjects' => Expect::arrayOf(Expect::string()->required()), // 'css' => '<link href="%path%" rel="stylesheet">'
+		])->castTo('array');
+	}
+
+
 	public function beforeCompile(): void
 	{
-		$assets = [];
-		$files = $this->getConfig()['routing'] ?? [];
+		/** @var mixed[] $config */
+		$config = $this->getConfig();
+		$files = $config['routing'] ?? [];
 
-		if (isset($this->getConfig()['base']) === true) {
-			$files = array_merge_recursive($files, ['*' => $this->getConfig()['base']]);
+		if ($config['base'] !== []) {
+			$files = array_merge_recursive($files, ['*' => $config['base']]);
 		}
 
+		$assets = [];
 		foreach ($files as $route => $assetFiles) {
 			$this->validateRouteFormat($route);
 			foreach ($assetFiles as $assetFile) {
@@ -31,14 +46,30 @@ final class LoaderExtension extends CompilerExtension
 
 					$assets[$route][$fileParser['format']][] = $assetFile;
 				} else {
-					AssetLoaderException::invalidFileName($assetFile);
+					throw new \RuntimeException('Invalid asset filename "' . $assetFile . '". Did you mean "' . $assetFile . '.js"?');
 				}
 			}
 		}
 
-		/** @var ServiceDefinition $definition */
-		$definition = $this->getContainerBuilder()->getDefinitionByType(Api::class);
-		$definition->addSetup('?->setData(?)', ['@self', $assets]);
+		foreach (($config['formatHtmlInjects'] ?? []) as $formatHtmlInject) {
+			if (strpos($formatHtmlInject, '%path%') === false) {
+				throw new \RuntimeException('HTML inject format must contains variable "%path%", but "' . $formatHtmlInject . '" given.');
+			}
+		}
+
+		$builder = $this->getContainerBuilder();
+		$builder->addDefinition($this->prefix('api'))
+			->setFactory(Api::class)
+			->setArgument('basePath', rtrim($config['basePath'] ?? $builder->parameters['wwwDir'] . '/assets', '/'))
+			->setArgument('data', $assets)
+			->setArgument('formatHeaders', array_merge([
+				'js' => 'application/json',
+				'css' => 'text/css',
+			], $config['formatHeaders'] ?? []))
+			->setArgument('formatHtmlInjects', array_merge([
+				'js' => '<script src="%path%"></script>',
+				'css' => '<link href="%path%" rel="stylesheet">',
+			], $config['formatHtmlInjects'] ?? []));
 	}
 
 
