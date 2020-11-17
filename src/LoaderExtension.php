@@ -63,7 +63,7 @@ final class LoaderExtension extends CompilerExtension
 			->setArgument('basePath', rtrim($config['basePath'] ?? $builder->parameters['wwwDir'] . '/assets', '/'))
 			->setArgument('data', $assets)
 			->setArgument('formatHeaders', array_merge([
-				'js' => 'application/json',
+				'js' => 'application/javascript',
 				'css' => 'text/css',
 			], $config['formatHeaders'] ?? []))
 			->setArgument('formatHtmlInjects', array_merge([
