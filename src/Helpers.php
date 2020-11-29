@@ -50,6 +50,9 @@ final class Helpers
 
 	public static function formatRouteToPath(string $route): ?string
 	{
+		if ($route === 'Error4xx:default') {
+			return 'error4xx-default';
+		}
 		if (preg_match('/^(?<module>[^:]+):(?<presenter>[^:]+):(?<action>[^:]+)$/', $route, $parser)) {
 			return self::firstLower($parser['module']) . '-' . self::firstLower($parser['presenter']) . '-' . self::firstLower($parser['action']);
 		}
