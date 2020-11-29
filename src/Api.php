@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Baraja\AssetsLoader;
 
 
+use Baraja\AssetsLoader\Minifier\Minifier;
+
 final class Api
 {
 	private string $basePath;
@@ -18,18 +20,21 @@ final class Api
 	/** @var string[] */
 	private array $formatHtmlInjects;
 
+	private Minifier $minifier;
+
 
 	/**
 	 * @param mixed[] $data
 	 * @param string[] $formatHeaders
 	 * @param string[] $formatHtmlInjects
 	 */
-	public function __construct(string $basePath, array $data, array $formatHeaders, array $formatHtmlInjects)
+	public function __construct(string $basePath, array $data, array $formatHeaders, array $formatHtmlInjects, Minifier $minifier)
 	{
 		$this->basePath = $basePath;
 		$this->data = $data;
 		$this->formatHeaders = $formatHeaders;
 		$this->formatHtmlInjects = $formatHtmlInjects;
+		$this->minifier = $minifier;
 	}
 
 
@@ -84,7 +89,7 @@ final class Api
 				foreach ($data[$format] ?? [] as $file) {
 					echo '/* ' . $file . ' */' . "\n";
 					if (is_file($path = $this->basePath . '/' . trim($file, '/')) === true) {
-						echo file_get_contents($path);
+						echo $this->minifier->minify(file_get_contents($path), $format);
 					}
 					echo "\n\n";
 				}

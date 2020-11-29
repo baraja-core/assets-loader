@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baraja\AssetsLoader;
 
 
+use Baraja\AssetsLoader\Minifier\Minifier;
 use Nette\Application\Application;
 use Nette\DI\CompilerExtension;
 use Nette\PhpGenerator\ClassType;
@@ -58,6 +59,10 @@ final class LoaderExtension extends CompilerExtension
 		}
 
 		$builder = $this->getContainerBuilder();
+
+		$builder->addDefinition($this->prefix('minifier'))
+			->setFactory(Minifier::class);
+
 		$builder->addDefinition($this->prefix('api'))
 			->setFactory(Api::class)
 			->setArgument('basePath', rtrim($config['basePath'] ?? $builder->parameters['wwwDir'] . '/assets', '/'))
