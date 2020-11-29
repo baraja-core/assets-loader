@@ -127,15 +127,12 @@ final class Api
 	private function findLocalData(string $route): array
 	{
 		if ($this->data !== []) {
-			$selectors = [];
-			if (preg_match('/^([^:]+):([^:]+):([^:]+)$/', trim($route, ':'), $routeParser)) {
-				$selectors[] = $routeParser[1] . ':' . $routeParser[2] . ':*';
-				$selectors[] = $routeParser[1] . ':' . $routeParser[2] . ':' . $routeParser[3];
-			} else {
-				AssetLoaderException::routeIsInInvalidFormat($route);
-			}
+			$routeParser = $this->parseRoute($route);
 
-			return $this->findDataBySelectors($selectors);
+			return $this->findDataBySelectors([
+				$routeParser['module'] . ':' . $routeParser['presenter'] . ':*',
+				$routeParser['module'] . ':' . $routeParser['presenter'] . ':' . $routeParser['action'],
+			]);
 		}
 
 		return $this->data;
@@ -148,15 +145,10 @@ final class Api
 	private function findGlobalData(string $route): array
 	{
 		if ($this->data !== []) {
-			$selectors = [];
-			if (preg_match('/^([^:]+):([^:]+):([^:]+)$/', trim($route, ':'), $routeParser)) {
-				$selectors[] = '*';
-				$selectors[] = $routeParser[1] . ':*';
-			} else {
-				AssetLoaderException::routeIsInInvalidFormat($route);
-			}
-
-			return $this->findDataBySelectors($selectors);
+			return $this->findDataBySelectors([
+				'*',
+				$this->parseRoute($route)['module'] . ':*',
+			]);
 		}
 
 		return [];
@@ -169,11 +161,36 @@ final class Api
 	 */
 	private function findDataBySelectors(array $selectors): array
 	{
+		$selectors = array_map(fn (string $item): string => trim($item, ':'), $selectors);
 		$return = [];
-		foreach ($selectors as $selector) {
+		foreach (array_unique($selectors) as $selector) {
 			$return[] = $this->data[$selector] ?? [];
 		}
 
 		return array_merge_recursive([], ...$return);
+	}
+
+
+	/**
+	 * @return string[]
+	 */
+	private function parseRoute(string $route): array
+	{
+		if ($route === 'Error4xx:default') {
+			return [
+				'module' => '',
+				'presenter' => 'Error4xx',
+				'action' => 'default',
+			];
+		}
+		if (preg_match('/^(?<module>[^:]+):(?<presenter>[^:]+):(?<action>[^:]+)$/', trim($route, ':'), $routeParser)) {
+			return $routeParser;
+		}
+
+		throw new AssetLoaderException(
+			'Route "' . $route . '" is invalid. '
+			. 'Route must be absolute "Module:Presenter:action" or end '
+			. 'with dynamic part in format "Module:*" or "Module:Presenter:*".'
+		);
 	}
 }
