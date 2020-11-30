@@ -25,6 +25,9 @@ final class Minifier
 		if ($format === 'css') {
 			return new DefaultCssMinifier;
 		}
+		if ($format === 'js') {
+			return new DefaultJsMinifier;
+		}
 
 		return new NullMinifier;
 	}
