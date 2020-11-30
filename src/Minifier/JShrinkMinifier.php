@@ -177,7 +177,7 @@ class JShrinkMinifier
 	 */
 	protected function loop(): void
 	{
-		while ($this->a !== null && !is_null($this->a) && $this->a !== '') {
+		while ($this->a !== null && $this->a !== '') {
 			switch ($this->a) {
 				// new lines
 				case "\n":
@@ -196,7 +196,7 @@ class JShrinkMinifier
 
 				// otherwise we treat the newline like a space
 
-				// no break
+				// break omitted
 				case ' ':
 					if (static::isAlphaNumeric((string) $this->b)) {
 						echo $this->a;
@@ -224,7 +224,7 @@ class JShrinkMinifier
 								break;
 							}
 
-						// no break
+						// break omitted
 						default:
 							// check for some regex that breaks stuff
 							if ($this->a === '/' && ($this->b === '\'' || $this->b === '"')) {
@@ -378,7 +378,7 @@ class JShrinkMinifier
 				// we need to echo a and fill it with a space before moving on.
 				if ($startIndex > 0) {
 					echo $this->a;
-					$this->a = " ";
+					$this->a = ' ';
 
 					// If the comment started on a new line we let it stay on the new line
 					if ($this->input[($startIndex - 1)] === "\n") {
