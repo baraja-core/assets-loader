@@ -60,12 +60,12 @@ final class Api
 	 *
 	 * 1. Route current HTTP query
 	 * 2. Set HTTP header (simulate real file response)
-	 * 3. Render welcome information header
-	 * 4. Return found data
+	 * 3. Loop all available data and count last modification date
+	 * 4. Render welcome information header + return minified haystack
 	 */
 	public function run(string $path): void
 	{
-		if (preg_match('/^assets\/web-loader\/(.+)$/', $path, $parser)) { // 1.
+		if (preg_match('/^assets\/web-loader\/(.+?)(?:\?v=[0-9a-f]{6})?$/', $path, $parser)) { // 1.
 			if (preg_match('/^global-(?<module>[a-zA-Z0-9]+)\.(?<format>[a-zA-Z0-9]+)$/', $parser[1], $globalRouteParser)) {
 				$format = $globalRouteParser['format'];
 				$data = $this->findGlobalData($globalRouteParser['module'] . ':Homepage:default');
@@ -84,15 +84,37 @@ final class Api
 					. 'Did you mean "' . implode('", "', array_keys($this->formatHeaders)) . '"?'
 				);
 			}
-			echo '/* Path "' . htmlspecialchars($path) . '" was automatically generated ' . date('Y-m-d H:i:s') . ' */' . "\n\n"; // 3.
-			if ($data !== []) { // 4.
+
+			$filePaths = [];
+			$topModTime = 0;
+			if ($data !== []) { // 3.
 				foreach ($data[$format] ?? [] as $file) {
-					echo '/* ' . $file . ' */' . "\n";
-					if (is_file($path = $this->basePath . '/' . trim($file, '/')) === true) {
-						echo $this->minifier->minify(file_get_contents($path), $format);
+					if (is_file($filePath = $this->basePath . '/' . trim($file, '/')) === true) {
+						if (($modificationTime = (int) filemtime($filePath)) > 0 && $modificationTime > $topModTime) {
+							$topModTime = $modificationTime;
+						}
+						$filePaths[$file] = $filePath;
 					}
-					echo "\n\n";
 				}
+			}
+			$topModTime = $topModTime ?: time();
+
+			$tsString = gmdate('D, d M Y H:i:s ', $topModTime) . 'GMT';
+			$etag = 'EN' . $topModTime;
+
+			if (($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag && ($_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? '') === $tsString) {
+				header('HTTP/1.1 304 Not Modified');
+				die;
+			}
+			header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + 86400)); // 1 day
+			header('Last-Modified: ' . $tsString);
+			header('ETag: "' . md5($etag) . '"');
+
+			echo '/* Path "' . htmlspecialchars($parser[1]) . '" was automatically generated ' . date('Y-m-d H:i:s', $topModTime) . ' */' . "\n\n"; // 4.
+			foreach ($filePaths as $file => $filePath) {
+				echo '/* ' . $file . ' */' . "\n";
+				echo $this->minifier->minify(file_get_contents($filePath), $format);
+				echo "\n\n";
 			}
 			die;
 		}
@@ -107,13 +129,21 @@ final class Api
 	{
 		$return = [];
 		foreach (array_keys($data) as $format) {
+			$topModTime = 0;
 			foreach ($data[$format] ?? [] as $item) {
 				if (preg_match('/^((?:https?:)?\/\/)(.+)$/', $item, $itemParser)) {
 					$return[] = str_replace('%path%', ($itemParser[1] === '//' ? 'https://' : '') . $itemParser[2], $this->formatHtmlInjects[$format]);
+				} elseif (is_file($filePath = $this->basePath . '/' . trim($item, '/')) === true && ($modificationTime = (int) filemtime($filePath)) > 0 && $modificationTime > $topModTime) {
+					$topModTime = $modificationTime;
 				}
 			}
 			if (isset($this->formatHtmlInjects[$format]) === true) {
-				$return[] = str_replace('%path%', Helpers::getBaseUrl() . '/assets/web-loader/' . $route . '.' . $format, $this->formatHtmlInjects[$format]);
+				$return[] = str_replace(
+					'%path%',
+					Helpers::getBaseUrl() . '/assets/web-loader/' . $route . '.' . $format
+					. ($topModTime > 0 ? '?v=' . substr(md5((string) $topModTime), 0, 6) : ''),
+					$this->formatHtmlInjects[$format]
+				);
 			}
 		}
 
