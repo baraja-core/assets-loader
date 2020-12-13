@@ -6,6 +6,7 @@ namespace Baraja\AssetsLoader;
 
 
 use Baraja\AssetsLoader\Minifier\Minifier;
+use Nette\Utils\FileSystem;
 
 final class Api
 {
@@ -113,7 +114,7 @@ final class Api
 			echo '/* Path "' . htmlspecialchars($parser[1]) . '" was automatically generated ' . date('Y-m-d H:i:s', $topModTime) . ' */' . "\n\n"; // 4.
 			foreach ($filePaths as $file => $filePath) {
 				echo '/* ' . $file . ' */' . "\n";
-				echo $this->minifier->minify(file_get_contents($filePath), $format);
+				echo $this->minifier->minify(FileSystem::read($filePath), $format);
 				echo "\n\n";
 			}
 			die;

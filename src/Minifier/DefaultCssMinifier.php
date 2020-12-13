@@ -9,7 +9,7 @@ final class DefaultCssMinifier implements AssetMinifier
 {
 	public function minify(string $haystack): string
 	{
-		return preg_replace_callback(
+		return (string) preg_replace_callback(
 			'#[ \t\r\n]+|<(/)?(textarea|pre|script)(?=\W)#si',
 			static function ($m): string {
 				if (empty($m[2])) {
