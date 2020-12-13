@@ -48,7 +48,7 @@ final class Helpers
 	}
 
 
-	public static function formatRouteToPath(string $route): ?string
+	public static function formatRouteToPath(string $route): string
 	{
 		if ($route === 'Error4xx:default') {
 			return 'error4xx-default';
@@ -57,7 +57,7 @@ final class Helpers
 			return self::firstLower($parser['module']) . '-' . self::firstLower($parser['presenter']) . '-' . self::firstLower($parser['action']);
 		}
 
-		return null;
+		throw new \InvalidArgumentException('Can not parse route format, because haystack "' . $route . '" given.');
 	}
 
 

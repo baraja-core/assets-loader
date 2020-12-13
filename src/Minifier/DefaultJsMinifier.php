@@ -11,6 +11,6 @@ final class DefaultJsMinifier implements AssetMinifier
 {
 	public function minify(string $haystack): string
 	{
-		return JShrinkMinifier::minify($haystack);
+		return (string) JShrinkMinifier::minify($haystack);
 	}
 }
