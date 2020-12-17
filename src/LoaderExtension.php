@@ -40,7 +40,7 @@ final class LoaderExtension extends CompilerExtension
 		foreach ($files as $route => $assetFiles) {
 			$this->validateRouteFormat($route);
 			foreach ($assetFiles as $assetFile) {
-				if (preg_match('/^(?<name>.+)\.(?<format>[a-zA-Z0-9]+)$/', $assetFile, $fileParser)) {
+				if (preg_match('/^(?<name>.+)\.(?<format>[a-zA-Z0-9]+)(?:\?.*)?$/', $assetFile, $fileParser)) {
 					if (isset($assets[$route][$fileParser['format']]) === false) {
 						$assets[$route][$fileParser['format']] = [];
 					}
