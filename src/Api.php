@@ -133,7 +133,7 @@ final class Api
 			$topModTime = 0;
 			foreach ($data[$format] ?? [] as $item) {
 				if (preg_match('/^((?:https?:)?\/\/)(.+)$/', $item, $itemParser)) {
-					$return[] = str_replace('%path%', ($itemParser[1] === '//' ? 'https://' : '') . $itemParser[2], $this->formatHtmlInjects[$format]);
+					$return[] = str_replace('%path%', ($itemParser[1] === '//' ? 'https://' : $itemParser[1]) . $itemParser[2], $this->formatHtmlInjects[$format]);
 				} elseif (is_file($filePath = $this->basePath . '/' . trim($item, '/')) === true && ($modificationTime = (int) filemtime($filePath)) > 0 && $modificationTime > $topModTime) {
 					$topModTime = $modificationTime;
 				}
