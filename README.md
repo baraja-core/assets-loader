@@ -12,7 +12,7 @@ This package solves:
 - Automatic compilation of styles and scripts directly on the server via PHP to maintain maximum performance and ease of use
 - Automatic cache management and invalidation
 
-This whole package (as well as the rest of the []Baraja ecosystem](https://github.com/baraja-core)) has been designed for simple and elegant use. It solves most complex issues internally, so you can easily build large applications effortlessly.
+This whole package (as well as the rest of the [Baraja ecosystem](https://github.com/baraja-core)) has been designed for simple and elegant use. It solves most complex issues internally, so you can easily build large applications effortlessly.
 
 📦 Installation & Basic Usage
 -----------------------------
@@ -36,7 +36,7 @@ extensions:
 
 In the project's `common.neon` you have to define basic project assets. A fully working example of configuration can be found in the `common.neon` file inside this package. You can define the configuration simply using `assetsLoader` extension.
 
-**Important:** Verify that your project `www/.htaccess` does not block the return of` css` and `js` files from PHP.
+**Important:** Verify that your project `www/.htaccess` does not block the return of `css` and `js` files from PHP.
 
 Basic usage
 -----------
@@ -52,7 +52,7 @@ Within your project `common.neon` file, simply define the location of each asset
 
 > **TIP:**
 >
-> Assets can also be read via a URL from a CDN server. In this case, the CDN paths will be listed directly in the source code.
+> Assets can also be declared as a URL from a CDN server (for example [Baraja CDN](https://cdn.baraja.cz)). In this case, the CDN paths will be listed directly in the source code.
 >
 > This type of asset loading is suitable for files that do not change their content over time because they are not managed by the Assets loader.
 
