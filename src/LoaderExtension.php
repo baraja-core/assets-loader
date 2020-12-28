@@ -39,16 +39,22 @@ final class LoaderExtension extends CompilerExtension
 		$assets = [];
 		foreach ($files as $route => $assetFiles) {
 			$this->validateRouteFormat($route);
-			foreach ($assetFiles as $assetFile) {
-				if (preg_match('/^(?<name>.+)\.(?<format>[a-zA-Z0-9]+)(?:\?.*)?$/', $assetFile, $fileParser)) {
-					if (isset($assets[$route][$fileParser['format']]) === false) {
-						$assets[$route][$fileParser['format']] = [];
+			foreach ($assetFiles as $assetFormat => $assetFile) {
+				if (\is_string($assetFormat)) {
+					if (!preg_match('/^[a-zA-Z0-9]+$/', $assetFile)) {
+						throw new \RuntimeException('Invalid asset format for file "' . $assetFormat . '", because "' . $assetFile . '" given.');
 					}
-
-					$assets[$route][$fileParser['format']][] = $assetFile;
+					$format = $assetFile;
+					$assetFile = $assetFormat;
+				} elseif (preg_match('/^(?<name>.+)\.(?<format>[a-zA-Z0-9]+)(?:\?.*)?$/', $assetFile, $fileParser)) {
+					$format = $fileParser['format'];
 				} else {
 					throw new \RuntimeException('Invalid asset filename "' . $assetFile . '". Did you mean "' . $assetFile . '.js"?');
 				}
+				if (isset($assets[$route][$format]) === false) {
+					$assets[$route][$format] = [];
+				}
+				$assets[$route][$format][] = $assetFile;
 			}
 		}
 
