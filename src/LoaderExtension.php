@@ -86,12 +86,18 @@ final class LoaderExtension extends CompilerExtension
 
 	public function afterCompile(ClassType $class): void
 	{
+		if (PHP_SAPI === 'cli') {
+			return;
+		}
 		$class->getMethod('initialize')->addBody(
-			'if (strncmp($assetsLoader__basePath = ' . Helpers::class . '::processPath($this->getService(\'http.request\')), \'assets/web-loader/\', 18) === 0) {'
-			. "\n\t" . '$this->getByType(' . Application::class . '::class)->onStartup[] = function(' . Application::class . ' $a) use ($assetsLoader__basePath) {'
-			. "\n\t\t" . '$this->getByType(\'' . Api::class . '\')->run($assetsLoader__basePath);'
-			. "\n\t" . '};'
-			. "\n" . '}'
+			'// assets loader.' . "\n"
+			. '(function () {' . "\n"
+			. "\t" . 'if (strncmp($assetsLoader__basePath = ' . Helpers::class . '::processPath($this->getService(\'http.request\')), \'assets/web-loader/\', 18) === 0) {' . "\n"
+			. "\t\t" . '$this->getByType(' . Application::class . '::class)->onStartup[] = function(' . Application::class . ' $a) use ($assetsLoader__basePath) {' . "\n"
+			. "\t\t\t" . '$this->getByType(\'' . Api::class . '\')->run($assetsLoader__basePath);' . "\n"
+			. "\t\t" . '};' . "\n"
+			. "\t" . '}' . "\n"
+			. '})();',
 		);
 	}
 
