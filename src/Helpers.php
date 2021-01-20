@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Baraja\AssetsLoader;
 
 
+use Baraja\Url\Url;
 use Nette\Http\Request;
 
 final class Helpers
@@ -23,22 +24,7 @@ final class Helpers
 	 */
 	public static function processPath(Request $httpRequest): string
 	{
-		return trim(str_replace(rtrim($httpRequest->getUrl()->withoutUserInfo()->getBaseUrl(), '/'), '', (string) self::getCurrentUrl()), '/');
-	}
-
-
-	/**
-	 * Return current absolute URL.
-	 * Return null, if current URL does not exist (for example in CLI mode).
-	 */
-	public static function getCurrentUrl(): ?string
-	{
-		if (!isset($_SERVER['REQUEST_URI'], $_SERVER['HTTP_HOST'])) {
-			return null;
-		}
-
-		return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
-			. '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		return trim(str_replace(rtrim($httpRequest->getUrl()->withoutUserInfo()->getBaseUrl(), '/'), '', Url::get()->getCurrentUrl()), '/');
 	}
 
 
@@ -86,25 +72,5 @@ final class Helpers
 	public static function length(string $s): int
 	{
 		return function_exists('mb_strlen') ? mb_strlen($s, 'UTF-8') : strlen(utf8_decode($s));
-	}
-
-
-	public static function getBaseUrl(): ?string
-	{
-		static $return;
-		if ($return === null) {
-			if (($currentUrl = self::getCurrentUrl()) !== null) {
-				if (preg_match('/^(https?:\/\/.+)\/www\//', $currentUrl, $localUrlParser)) {
-					$return = $localUrlParser[0];
-				} elseif (preg_match('/^(https?:\/\/[^\/]+)/', $currentUrl, $publicUrlParser)) {
-					$return = $publicUrlParser[1];
-				}
-			}
-			if ($return !== null) {
-				$return = rtrim($return, '/');
-			}
-		}
-
-		return $return;
 	}
 }

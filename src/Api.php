@@ -6,6 +6,7 @@ namespace Baraja\AssetsLoader;
 
 
 use Baraja\AssetsLoader\Minifier\Minifier;
+use Baraja\Url\Url;
 use Nette\Utils\FileSystem;
 
 final class Api
@@ -141,7 +142,7 @@ final class Api
 			if (isset($this->formatHtmlInjects[$format]) === true) {
 				$return[] = str_replace(
 					'%path%',
-					Helpers::getBaseUrl() . '/assets/web-loader/' . $route . '.' . $format
+					Url::get()->getBaseUrl() . '/assets/web-loader/' . $route . '.' . $format
 					. ($topModTime > 0 ? '?v=' . substr(md5((string) $topModTime), 0, 6) : ''),
 					$this->formatHtmlInjects[$format]
 				);
