@@ -116,7 +116,7 @@ final class Api
 				header('HTTP/1.1 304 Not Modified');
 				die;
 			}
-			header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + 86400)); // 1 day
+			header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + 86_400)); // 1 day
 			header('Last-Modified: ' . $tsString);
 			header('ETag: "' . md5($etag) . '"');
 
