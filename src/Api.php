@@ -30,8 +30,13 @@ final class Api
 	 * @param string[] $formatHeaders
 	 * @param string[] $formatHtmlInjects
 	 */
-	public function __construct(string $basePath, array $data, array $formatHeaders, array $formatHtmlInjects, Minifier $minifier)
-	{
+	public function __construct(
+		string $basePath,
+		array $data,
+		array $formatHeaders,
+		array $formatHtmlInjects,
+		Minifier $minifier
+	) {
 		$this->basePath = $basePath;
 		$this->data = $data;
 		$this->formatHeaders = $formatHeaders;
@@ -52,7 +57,7 @@ final class Api
 
 		return implode("\n", array_merge(
 			$this->renderInjectTagsByData('global-' . preg_replace('/^([^-]+)-(.*)$/', '$1', $routePath), $this->findGlobalData($route)),
-			$this->renderInjectTagsByData($routePath, $this->findLocalData($route))
+			$this->renderInjectTagsByData($routePath, $this->findLocalData($route)),
 		));
 	}
 
@@ -83,7 +88,7 @@ final class Api
 			} else {
 				throw new \RuntimeException(
 					'Content type for format "' . $format . '" does not exist. '
-					. 'Did you mean "' . implode('", "', array_keys($this->formatHeaders)) . '"?'
+					. 'Did you mean "' . implode('", "', array_keys($this->formatHeaders)) . '"?',
 				);
 			}
 
@@ -104,7 +109,10 @@ final class Api
 			$tsString = gmdate('D, d M Y H:i:s ', $topModTime) . 'GMT';
 			$etag = 'EN' . $topModTime;
 
-			if (($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag && ($_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? '') === $tsString) {
+			if (
+				($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag
+				&& ($_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? '') === $tsString
+			) {
 				header('HTTP/1.1 304 Not Modified');
 				die;
 			}
@@ -135,7 +143,11 @@ final class Api
 			foreach ($data[$format] ?? [] as $item) {
 				if (preg_match('/^((?:https?:)?\/\/)(.+)$/', $item, $itemParser)) {
 					$return[] = str_replace('%path%', ($itemParser[1] === '//' ? 'https://' : $itemParser[1]) . $itemParser[2], $this->formatHtmlInjects[$format]);
-				} elseif (is_file($filePath = $this->basePath . '/' . trim($item, '/')) === true && ($modificationTime = (int) filemtime($filePath)) > 0 && $modificationTime > $topModTime) {
+				} elseif (
+					is_file($filePath = $this->basePath . '/' . trim($item, '/')) === true
+					&& ($modificationTime = (int) filemtime($filePath)) > 0
+					&& $modificationTime > $topModTime
+				) {
 					$topModTime = $modificationTime;
 				}
 			}
@@ -144,7 +156,7 @@ final class Api
 					'%path%',
 					Url::get()->getBaseUrl() . '/assets/web-loader/' . $route . '.' . $format
 					. ($topModTime > 0 ? '?v=' . substr(md5((string) $topModTime), 0, 6) : ''),
-					$this->formatHtmlInjects[$format]
+					$this->formatHtmlInjects[$format],
 				);
 			}
 		}
@@ -222,7 +234,7 @@ final class Api
 		throw new AssetLoaderException(
 			'Route "' . $route . '" is invalid. '
 			. 'Route must be absolute "Module:Presenter:action" or end '
-			. 'with dynamic part in format "Module:*" or "Module:Presenter:*".'
+			. 'with dynamic part in format "Module:*" or "Module:Presenter:*".',
 		);
 	}
 }
