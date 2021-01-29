@@ -12,7 +12,7 @@ final class AssetLoaderException extends \RuntimeException
 		throw new self(
 			'Route "' . $route . '" is invalid. '
 			. 'Route must be absolute "Module:Presenter:action" or end '
-			. 'with dynamic part in format "Module:*" or "Module:Presenter:*".'
+			. 'with dynamic part in format "Module:*" or "Module:Presenter:*".',
 		);
 	}
 }

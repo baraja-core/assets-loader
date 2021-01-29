@@ -299,7 +299,6 @@ class JShrinkMinifier
 	 * performance benefits as the skipping is done using native functions (ie,
 	 * c code) rather than in script php.
 	 *
-	 *
 	 * @return string            Next 'real' character to be processed.
 	 * @throws \RuntimeException
 	 */
@@ -338,7 +337,9 @@ class JShrinkMinifier
 	 */
 	protected function processOneLineComments(int $startIndex): void
 	{
-		$thirdCommentString = $this->index < $this->len ? $this->input[$this->index] : null;
+		$thirdCommentString = $this->index < $this->len
+			? $this->input[$this->index]
+			: null;
 
 		// kill rest of line
 		$this->getNext("\n");
@@ -381,12 +382,12 @@ class JShrinkMinifier
 					$this->a = ' ';
 
 					// If the comment started on a new line we let it stay on the new line
-					if ($this->input[($startIndex - 1)] === "\n") {
+					if ($this->input[$startIndex - 1] === "\n") {
 						echo "\n";
 					}
 				}
 
-				$endPoint = ($this->index - 1) - $startIndex;
+				$endPoint = $this->index - 1 - $startIndex;
 				echo substr($this->input, $startIndex, $endPoint);
 
 				$this->c = $char;
@@ -553,11 +554,9 @@ class JShrinkMinifier
 
 		$this->locks[$lock] = $matches[2];
 
-		$js = (string) preg_replace('/([+-])\s+([+-])/S', '$1' . $lock . '$2', $js);
+		return (string) preg_replace('/([+-])\s+([+-])/S', '$1' . $lock . '$2', $js);
 
 		/* -- */
-
-		return $js;
 	}
 
 
