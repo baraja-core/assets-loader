@@ -5,15 +5,42 @@ declare(strict_types=1);
 namespace Baraja\AssetsLoader\Minifier;
 
 
+use Nette\Caching\Cache;
+use Nette\Caching\Storage;
+
 final class Minifier
 {
 	/** @var AssetMinifier[] (format => service) */
 	private array $services = [];
 
+	private ?Cache $cache = null;
+
+	private string $cacheExpiration = '1 hour';
+
+
+	public function __construct(?Storage $storage = null)
+	{
+		if ($storage !== null) {
+			$this->cache = new Cache($storage, 'baraja-assets-loader-minifier');
+		}
+	}
+
 
 	public function minify(string $haystack, string $format): string
 	{
-		return $this->getMinifier($format)->minify($haystack);
+		$key = $format . '-' . md5($haystack);
+		if ($this->cache !== null && ($cache = $this->cache->load($key)) !== null) {
+			return (string) $cache;
+		}
+		$return = $this->getMinifier($format)->minify($haystack);
+		if ($this->cache !== null) {
+			$this->cache->save($key, $return, [
+				Cache::EXPIRE => $this->cacheExpiration,
+				Cache::TAGS => [$format, 'minifier'],
+			]);
+		}
+
+		return $return;
 	}
 
 
@@ -40,5 +67,11 @@ final class Minifier
 		}
 
 		$this->services[$format] = $minifier;
+	}
+
+
+	public function setCacheExpiration(string $cacheExpiration): void
+	{
+		$this->cacheExpiration = $cacheExpiration;
 	}
 }
