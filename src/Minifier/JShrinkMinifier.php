@@ -412,7 +412,6 @@ class JShrinkMinifier
 	 * is found the first character of the string is returned and the index is set
 	 * to it's position.
 	 *
-	 * @param string $string
 	 * @return string|null Returns the first character of the string or null.
 	 */
 	protected function getNext(string $string): ?string
@@ -538,11 +537,7 @@ class JShrinkMinifier
 	}
 
 
-	/**
-	 * Replace patterns in the given string and store the replacement
-	 *
-	 * @param string $js The string to lock
-	 */
+	/** Replace patterns in the given string and store the replacement */
 	protected function lock(string $js): string
 	{
 		/* lock things like <code>"asd" + ++x;</code> */
@@ -555,22 +550,15 @@ class JShrinkMinifier
 		$this->locks[$lock] = $matches[2];
 
 		return (string) preg_replace('/([+-])\s+([+-])/S', '$1' . $lock . '$2', $js);
-
-		/* -- */
 	}
 
 
-	/**
-	 * Replace "locks" with the original characters
-	 *
-	 * @param string $js The string to unlock
-	 */
+	/** Replace "locks" with the original characters. */
 	protected function unlock(string $js): string
 	{
 		if ($this->locks === []) {
 			return $js;
 		}
-
 		foreach ($this->locks as $lock => $replacement) {
 			$js = str_replace($lock, $replacement, $js);
 		}
