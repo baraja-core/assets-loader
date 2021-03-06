@@ -11,7 +11,7 @@ final class DefaultCssMinifier implements AssetMinifier
 	{
 		$return = (string) preg_replace_callback(
 			'#[ \t\r\n]+|<(/)?(textarea|pre)(?=\W)#i',
-			fn(array $match): string => empty($match[2]) ? ' ' : $match[0],
+			static fn(array $match): string => empty($match[2]) ? ' ' : $match[0],
 			$haystack,
 		);
 		$return = (string) preg_replace('/(\w|;)\s+({|})\s+(\w|\.|#)/', '$1$2$3', $return);
