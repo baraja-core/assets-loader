@@ -205,7 +205,7 @@ final class Api
 	 */
 	private function findDataBySelectors(array $selectors): array
 	{
-		$selectors = array_map(fn (string $item): string => trim($item, ':'), $selectors);
+		$selectors = array_map(fn(string $item): string => trim($item, ':'), $selectors);
 		$return = [];
 		foreach (array_unique($selectors) as $selector) {
 			$return[] = $this->data[$selector] ?? [];
