@@ -108,7 +108,11 @@ final class LoaderExtension extends CompilerExtension
 			return;
 		}
 		if (preg_match('/^[A-Z0-9][A-Za-z0-9]*:(?:\*|[A-Z0-9][A-Za-z0-9]*:(?:\*|[a-z0-9][A-Za-z0-9]*))$/', trim($route, ':')) === 0) {
-			AssetLoaderException::routeIsInInvalidFormat($route);
+			throw new AssetLoaderException(
+				'Route "' . $route . '" is invalid. '
+				. 'Route must be absolute "Module:Presenter:action" or end '
+				. 'with dynamic part in format "Module:*" or "Module:Presenter:*".',
+			);
 		}
 	}
 }

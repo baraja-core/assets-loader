@@ -11,8 +11,6 @@ use Nette\Utils\FileSystem;
 
 final class Api
 {
-	private string $basePath;
-
 	/** @var mixed[] */
 	private array $data;
 
@@ -22,8 +20,6 @@ final class Api
 	/** @var string[] */
 	private array $formatHtmlInjects;
 
-	private Minifier $minifier;
-
 
 	/**
 	 * @param mixed[] $data
@@ -31,17 +27,15 @@ final class Api
 	 * @param string[] $formatHtmlInjects
 	 */
 	public function __construct(
-		string $basePath,
+		private string $basePath,
 		array $data,
 		array $formatHeaders,
 		array $formatHtmlInjects,
-		Minifier $minifier
+		private Minifier $minifier
 	) {
-		$this->basePath = $basePath;
 		$this->data = $data;
 		$this->formatHeaders = $formatHeaders;
 		$this->formatHtmlInjects = $formatHtmlInjects;
-		$this->minifier = $minifier;
 	}
 
 
@@ -205,7 +199,7 @@ final class Api
 	 */
 	private function findDataBySelectors(array $selectors): array
 	{
-		$selectors = array_map(fn(string $item): string => trim($item, ':'), $selectors);
+		$selectors = array_map(static fn(string $item): string => trim($item, ':'), $selectors);
 		$return = [];
 		foreach (array_unique($selectors) as $selector) {
 			$return[] = $this->data[$selector] ?? [];
