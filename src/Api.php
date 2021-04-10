@@ -90,11 +90,15 @@ final class Api
 			$topModTime = 0;
 			if ($data !== []) { // 3.
 				foreach ($data[$format] ?? [] as $file) {
-					if (is_file($filePath = $this->basePath . '/' . trim($file, '/')) === true) {
-						if (($modificationTime = (int) filemtime($filePath)) > 0 && $modificationTime > $topModTime) {
+					$filePath = $this->basePath . '/' . trim($file, '/');
+					if (is_file($filePath) === true) {
+						$modificationTime = (int) filemtime($filePath);
+						if ($modificationTime > 0 && $modificationTime > $topModTime) {
 							$topModTime = $modificationTime;
 						}
 						$filePaths[$file] = $filePath;
+					} else {
+						trigger_error('File "' . $file . '" does not exist. Path: ' . $filePath);
 					}
 				}
 			}
