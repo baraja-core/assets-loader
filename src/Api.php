@@ -90,6 +90,9 @@ final class Api
 			$topModTime = 0;
 			if ($data !== []) { // 3.
 				foreach ($data[$format] ?? [] as $file) {
+					if (preg_match('~^(?:https?:)//~', $file)) { // do not accept URL
+						continue;
+					}
 					$filePath = $this->basePath . '/' . trim($file, '/');
 					if (is_file($filePath) === true) {
 						$modificationTime = (int) filemtime($filePath);
