@@ -105,12 +105,10 @@ class JShrinkMinifier
 
 			return $js;
 		} catch (\Throwable $e) {
-			if (isset($jshrink)) {
-				// Since the breakdownScript function probably wasn't finished
-				// we clean it out before discarding it.
-				$jshrink->clean();
-				unset($jshrink);
-			}
+			// Since the breakdownScript function probably wasn't finished
+			// we clean it out before discarding it.
+			$jshrink->clean();
+			unset($jshrink);
 
 			// without this call things get weird, with partially outputted js.
 			ob_end_clean();
