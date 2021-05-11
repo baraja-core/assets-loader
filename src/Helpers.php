@@ -23,7 +23,14 @@ final class Helpers
 	 */
 	public static function processPath(Request $httpRequest): string
 	{
-		return trim(str_replace(rtrim($httpRequest->getUrl()->withoutUserInfo()->getBaseUrl(), '/'), '', Url::get()->getCurrentUrl()), '/');
+		return trim(
+			str_replace(
+				rtrim($httpRequest->getUrl()->withoutUserInfo()->getBaseUrl(), '/'),
+				'',
+				Url::get()->getCurrentUrl()
+			),
+			'/'
+		);
 	}
 
 
@@ -42,7 +49,9 @@ final class Helpers
 			return 'error4xx-default';
 		}
 		if (preg_match('/^(?<module>[^:]+):(?<presenter>[^:]+):(?<action>[^:]+)$/', $route, $parser)) {
-			return self::firstLower($parser['module']) . '-' . self::firstLower($parser['presenter']) . '-' . self::firstLower($parser['action']);
+			return self::firstLower($parser['module'])
+				. '-' . self::firstLower($parser['presenter'])
+				. '-' . self::firstLower($parser['action']);
 		}
 
 		throw new \InvalidArgumentException('Can not parse route format, because haystack "' . $route . '" given.');
@@ -51,30 +60,12 @@ final class Helpers
 
 	public static function firstUpper(string $s): string
 	{
-		return strtoupper($s[0] ?? '') . (function_exists('mb_substr')
-				? mb_substr($s, 1, null, 'UTF-8')
-				: iconv_substr($s, 1, self::length($s), 'UTF-8')
-			);
+		return strtoupper($s[0] ?? '') . mb_substr($s, 1, null, 'UTF-8');
 	}
 
 
 	public static function firstLower(string $s): string
 	{
-		return strtolower($s[0] ?? '') . (function_exists('mb_substr')
-				? mb_substr($s, 1, null, 'UTF-8')
-				: iconv_substr($s, 1, self::length($s), 'UTF-8')
-			);
-	}
-
-
-	/**
-	 * Returns number of characters (not bytes) in UTF-8 string.
-	 * That is the number of Unicode code points which may differ from the number of graphemes.
-	 */
-	public static function length(string $s): int
-	{
-		return function_exists('mb_strlen')
-			? mb_strlen($s, 'UTF-8')
-			: strlen(utf8_decode($s));
+		return strtolower($s[0] ?? '') . mb_substr($s, 1, null, 'UTF-8');
 	}
 }

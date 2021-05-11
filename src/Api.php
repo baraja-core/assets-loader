@@ -41,18 +41,28 @@ final class Api
 
 	public function isAssetsAvailable(string $route): bool
 	{
-		return $this->findGlobalData($route = trim($route, ':')) !== [] || $this->findLocalData($route) !== [];
+		$route = trim($route, ':');
+
+		return $this->findGlobalData($route) !== []
+			|| $this->findLocalData($route) !== [];
 	}
 
 
 	public function getHtmlInit(string $route): string
 	{
-		$routePath = Helpers::formatRouteToPath($route = trim($route, ':'));
+		$route = trim($route, ':');
+		$routePath = Helpers::formatRouteToPath($route);
 
-		return implode("\n", array_merge(
-			$this->renderInjectTagsByData('global-' . preg_replace('/^([^-]+)-(.*)$/', '$1', $routePath), $this->findGlobalData($route)),
-			$this->renderInjectTagsByData($routePath, $this->findLocalData($route)),
-		));
+		return implode(
+			"\n",
+			array_merge(
+				$this->renderInjectTagsByData(
+					'global-' . preg_replace('/^([^-]+)-(.*)$/', '$1', $routePath),
+					$this->findGlobalData($route)
+				),
+				$this->renderInjectTagsByData($routePath, $this->findLocalData($route)),
+			)
+		);
 	}
 
 
@@ -67,12 +77,22 @@ final class Api
 	public function run(string $path): void
 	{
 		if (preg_match('/^assets\/web-loader\/(.+?)(?:\?v=[0-9a-f]{6})?$/', $path, $parser)) { // 1.
-			if (preg_match('/^global-(?<module>[a-zA-Z0-9]+)\.(?<format>[a-zA-Z0-9]+)$/', $parser[1], $globalRouteParser)) {
+			if (preg_match(
+				'/^global-(?<module>[a-zA-Z0-9]+)\.(?<format>[a-zA-Z0-9]+)$/',
+				$parser[1],
+				$globalRouteParser
+			)) {
 				$format = $globalRouteParser['format'];
 				$data = $this->findGlobalData($globalRouteParser['module'] . ':Homepage:default');
-			} elseif (preg_match('/^(?<module>[a-zA-Z0-9]+)-(?<presenter>[a-zA-Z0-9]+)-(?<action>[a-zA-Z0-9]+)\.(?<format>[a-zA-Z0-9]+)$/', $parser[1], $routeParser)) {
+			} elseif (preg_match(
+				'/^(?<module>[a-zA-Z0-9]+)-(?<presenter>[a-zA-Z0-9]+)-(?<action>[a-zA-Z0-9]+)\.(?<format>[a-zA-Z0-9]+)$/',
+				$parser[1],
+				$routeParser
+			)) {
 				$format = $routeParser['format'];
-				$data = $this->findLocalData(Helpers::formatRoute($routeParser['module'], $routeParser['presenter'], $routeParser['action']));
+				$data = $this->findLocalData(
+					Helpers::formatRoute($routeParser['module'], $routeParser['presenter'], $routeParser['action'])
+				);
 			} else {
 				echo '/* empty body */';
 				die;
@@ -90,7 +110,7 @@ final class Api
 			$topModTime = 0;
 			if ($data !== []) { // 3.
 				foreach ($data[$format] ?? [] as $file) {
-					if (preg_match('~^(?:https?:)//~', $file)) { // do not accept URL
+					if (preg_match('~^https?://~', $file)) { // do not accept URL
 						continue;
 					}
 					$filePath = $this->basePath . '/' . trim($file, '/');
@@ -121,7 +141,10 @@ final class Api
 			header('Last-Modified: ' . $tsString);
 			header('ETag: "' . md5($etag) . '"');
 
-			echo '/* Path "' . htmlspecialchars($parser[1]) . '" was automatically generated ' . date('Y-m-d H:i:s', $topModTime) . ' */' . "\n\n"; // 4.
+			echo '/* Path "' . htmlspecialchars($parser[1]) . '" was automatically generated '
+				. date('Y-m-d H:i:s', $topModTime)
+				. ' */' . "\n\n"; // 4.
+
 			foreach ($filePaths as $file => $filePath) {
 				echo '/* ' . $file . ' */' . "\n";
 				echo $this->minifier->minify(FileSystem::read($filePath), $format);
@@ -143,7 +166,11 @@ final class Api
 			$topModTime = 0;
 			foreach ($data[$format] ?? [] as $item) {
 				if (preg_match('/^((?:https?:)?\/\/)(.+)$/', $item, $itemParser)) {
-					$return[] = str_replace('%path%', ($itemParser[1] === '//' ? 'https://' : $itemParser[1]) . $itemParser[2], $this->formatHtmlInjects[$format]);
+					$return[] = str_replace(
+						'%path%',
+						($itemParser[1] === '//' ? 'https://' : $itemParser[1]) . $itemParser[2],
+						$this->formatHtmlInjects[$format]
+					);
 				} elseif (
 					is_file($filePath = $this->basePath . '/' . trim($item, '/')) === true
 					&& ($modificationTime = (int) filemtime($filePath)) > 0
@@ -174,10 +201,12 @@ final class Api
 		if ($this->data !== []) {
 			$routeParser = $this->parseRoute($route);
 
-			return $this->findDataBySelectors([
-				$routeParser['module'] . ':' . $routeParser['presenter'] . ':*',
-				$routeParser['module'] . ':' . $routeParser['presenter'] . ':' . $routeParser['action'],
-			]);
+			return $this->findDataBySelectors(
+				[
+					$routeParser['module'] . ':' . $routeParser['presenter'] . ':*',
+					$routeParser['module'] . ':' . $routeParser['presenter'] . ':' . $routeParser['action'],
+				]
+			);
 		}
 
 		return $this->data;
@@ -190,10 +219,12 @@ final class Api
 	private function findGlobalData(string $route): array
 	{
 		if ($this->data !== []) {
-			return $this->findDataBySelectors([
-				'*',
-				$this->parseRoute($route)['module'] . ':*',
-			]);
+			return $this->findDataBySelectors(
+				[
+					'*',
+					$this->parseRoute($route)['module'] . ':*',
+				]
+			);
 		}
 
 		return [];

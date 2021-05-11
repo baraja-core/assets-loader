@@ -22,7 +22,7 @@ class JShrinkMinifier
 	 * the one passed in by the user to create the request specific set of
 	 * options (stored in the $options attribute).
 	 *
-	 * @var bool[]
+	 * @var array<string, bool>
 	 */
 	protected static array $defaultOptions = ['flaggedComments' => true];
 
@@ -54,7 +54,7 @@ class JShrinkMinifier
 	/**
 	 * These characters are used to define strings.
 	 *
-	 * @var bool[]
+	 * @var array<string, bool>
 	 */
 	protected array $stringDelimiters = ['\'' => true, '"' => true, '`' => true];
 
@@ -69,7 +69,7 @@ class JShrinkMinifier
 	/**
 	 * Characters that can't stand alone preserve the newline.
 	 *
-	 * @var bool[]
+	 * @var array<string, bool>
 	 */
 	protected array $noNewLineCharacters = [
 		'(' => true,
@@ -90,25 +90,25 @@ class JShrinkMinifier
 	 */
 	public static function minify(string $js, array $options = []): ?string
 	{
-		$jshrink = null;
+		$self = null;
 		try {
 			ob_start();
 
-			$jshrink = new self;
-			$js = $jshrink->lock($js);
-			$jshrink->minifyDirectToOutput($js, $options);
+			$self = new self;
+			$js = $self->lock($js);
+			$self->minifyDirectToOutput($js, $options);
 
 			// Sometimes there's a leading new line, so we trim that out here.
 			$js = ltrim((string) ob_get_clean());
-			$js = $jshrink->unlock($js);
-			unset($jshrink);
+			$js = $self->unlock($js);
+			unset($self);
 
 			return $js;
 		} catch (\Throwable $e) {
 			// Since the breakdownScript function probably wasn't finished
 			// we clean it out before discarding it.
-			$jshrink->clean();
-			unset($jshrink);
+			$self->clean();
+			unset($self);
 
 			// without this call things get weird, with partially outputted js.
 			ob_end_clean();
@@ -206,7 +206,7 @@ class JShrinkMinifier
 				default:
 					switch ($this->b) {
 						case "\n":
-							if (strpos('}])+-"\'', $this->a) !== false) {
+							if (str_contains('}])+-"\'', $this->a)) {
 								echo $this->a;
 								$this->saveString();
 								break;
@@ -239,7 +239,7 @@ class JShrinkMinifier
 			// do reg check of doom
 			$this->b = $this->getReal();
 
-			if (($this->b === '/' && strpos('(,=:[!&|?', (string) $this->a) !== false)) {
+			if (($this->b === '/' && str_contains('(,=:[!&|?', (string) $this->a))) {
 				$this->saveRegex();
 			}
 		}
@@ -311,7 +311,6 @@ class JShrinkMinifier
 		}
 
 		$this->c = $this->getChar();
-
 		if ($this->c === '/') {
 			$this->processOneLineComments($startIndex);
 
