@@ -59,7 +59,7 @@ final class LoaderExtension extends CompilerExtension
 		}
 
 		foreach (($config['formatHtmlInjects'] ?? []) as $formatHtmlInject) {
-			if (strpos($formatHtmlInject, '%path%') === false) {
+			if (!str_contains($formatHtmlInject, '%path%')) {
 				throw new \RuntimeException('HTML inject format must contains variable "%path%", but "' . $formatHtmlInject . '" given.');
 			}
 		}
