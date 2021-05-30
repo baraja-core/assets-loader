@@ -16,9 +16,21 @@ final class LoaderExtension extends CompilerExtension
 {
 	public function getConfigSchema(): Schema
 	{
+		// Expect::anyOf([
+		//    Expect::string(), // URL
+		//    Expect::structure([
+		//       'source' => Expect::string()->required(),
+		//       'format' => Expect::string()->required(),
+		//    ]),
+		// ])->firstIsDefault()
 		return Expect::structure([
 			'basePath' => Expect::string(),
-			'routing' => Expect::arrayOf(Expect::arrayOf(Expect::string()->required())),
+			'routing' => Expect::arrayOf( // (route [*] => rules)
+				Expect::arrayOf( // (rule => definition)
+					Expect::mixed(),
+				),
+				Expect::anyOf(Expect::string()->required()),
+			),
 			'base' => Expect::array(),
 			'formatHeaders' => Expect::arrayOf(Expect::string()->required()), // 'css' => 'text/css'
 			'formatHtmlInjects' => Expect::arrayOf(Expect::string()->required()), // 'css' => '<link href="%path%" rel="stylesheet">'
@@ -40,7 +52,14 @@ final class LoaderExtension extends CompilerExtension
 		foreach ($files as $route => $assetFiles) {
 			$this->validateRouteFormat($route);
 			foreach ($assetFiles as $assetFormat => $assetFile) {
-				if (\is_string($assetFormat)) {
+				if (is_array($assetFile)) {
+					if (isset($assetFile['format'], $assetFile['source'])) {
+						$format = $assetFile['format'];
+						$assetFile = $assetFile['source'];
+					} else {
+						throw new \RuntimeException('Invalid asset structure, expected keys "format" and "source".');
+					}
+				} elseif (is_string($assetFormat)) {
 					if (!preg_match('/^[a-zA-Z0-9]+$/', $assetFile)) {
 						throw new \RuntimeException('Invalid asset format for file "' . $assetFormat . '", because "' . $assetFile . '" given.');
 					}
