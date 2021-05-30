@@ -16,18 +16,17 @@ final class LoaderExtension extends CompilerExtension
 {
 	public function getConfigSchema(): Schema
 	{
-		// Expect::anyOf([
-		//    Expect::string(), // URL
-		//    Expect::structure([
-		//       'source' => Expect::string()->required(),
-		//       'format' => Expect::string()->required(),
-		//    ]),
-		// ])->firstIsDefault()
 		return Expect::structure([
 			'basePath' => Expect::string(),
 			'routing' => Expect::arrayOf( // (route [*] => rules)
 				Expect::arrayOf( // (rule => definition)
-					Expect::mixed(),
+					Expect::anyOf(
+						Expect::string()->required(), // URL
+						Expect::structure([
+							'source' => Expect::string()->required(),
+							'format' => Expect::string()->required(),
+						])->castTo('array')->required(),
+					)->required()->firstIsDefault()
 				),
 				Expect::anyOf(Expect::string()->required()),
 			),
