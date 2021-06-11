@@ -113,7 +113,7 @@ In BasePresenter, create an instance of the service, pass it to the template, wh
 ```php
 abstract class BasePresenter extends \App\Presenters\BasePresenter
 {
-   /** @inject */
+   #[Inject]
    public Api $assetsLoader;
 
    public function startup(): void
