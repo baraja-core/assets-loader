@@ -74,9 +74,9 @@ final class Api
 	 * 3. Loop all available data and count last modification date
 	 * 4. Render welcome information header + return minified haystack
 	 */
-	public function run(string $path): void
+	public function run(): void
 	{
-		if (preg_match('/^assets\/web-loader\/(.+?)(?:\?v=[0-9a-f]{6})?$/', $path, $parser)) { // 1.
+		if (preg_match('/^assets\/web-loader\/(.+?)(?:\?v=[0-9a-f]{6})?$/', Url::get()->getRelativeUrl(), $parser)) { // 1.
 			if (preg_match(
 				'/^global-(?<module>[a-zA-Z0-9]+)\.(?<format>[a-zA-Z0-9]+)$/',
 				$parser[1],
