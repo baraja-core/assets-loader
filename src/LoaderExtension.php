@@ -6,6 +6,7 @@ namespace Baraja\AssetsLoader;
 
 
 use Baraja\AssetsLoader\Minifier\Minifier;
+use Baraja\Url\Url;
 use Nette\Application\Application;
 use Nette\DI\CompilerExtension;
 use Nette\PhpGenerator\ClassType;
@@ -109,10 +110,10 @@ final class LoaderExtension extends CompilerExtension
 		}
 		$class->getMethod('initialize')->addBody(
 			'// assets loader.' . "\n"
-			. '(function () {' . "\n"
-			. "\t" . 'if (strncmp($assetsLoader__basePath = ' . Helpers::class . '::processPath($this->getService(\'http.request\')), \'assets/web-loader/\', 18) === 0) {' . "\n"
-			. "\t\t" . '$this->getByType(' . Application::class . '::class)->onStartup[] = function(' . Application::class . ' $a) use ($assetsLoader__basePath) {' . "\n"
-			. "\t\t\t" . '$this->getByType(\'' . Api::class . '\')->run($assetsLoader__basePath);' . "\n"
+			. '(function (): void {' . "\n"
+			. "\t" . 'if (str_starts_with(' . Url::class . '::get()->getRelativeUrl(), \'assets/web-loader/\')) {' . "\n"
+			. "\t\t" . '$this->getByType(' . Application::class . '::class)->onStartup[] = function(' . Application::class . ' $a): void {' . "\n"
+			. "\t\t\t" . '$this->getByType(\'' . Api::class . '\')->run();' . "\n"
 			. "\t\t" . '};' . "\n"
 			. "\t" . '}' . "\n"
 			. '})();',
