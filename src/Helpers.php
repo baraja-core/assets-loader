@@ -5,32 +5,12 @@ declare(strict_types=1);
 namespace Baraja\AssetsLoader;
 
 
-use Baraja\Url\Url;
-use Nette\Http\Request;
-
 final class Helpers
 {
 	/** @throws \Error */
 	public function __construct()
 	{
 		throw new \Error('Class ' . static::class . ' is static and cannot be instantiated.');
-	}
-
-
-	/**
-	 * Return current API path by current HTTP URL.
-	 * In case of CLI return empty string.
-	 */
-	public static function processPath(Request $httpRequest): string
-	{
-		return trim(
-			str_replace(
-				rtrim($httpRequest->getUrl()->withoutUserInfo()->getBaseUrl(), '/'),
-				'',
-				Url::get()->getCurrentUrl()
-			),
-			'/'
-		);
 	}
 
 
