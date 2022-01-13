@@ -260,7 +260,11 @@ final class Api
 			];
 		}
 		if (preg_match('/^(?<module>[^:]+):(?<presenter>[^:]+):(?<action>[^:]+)$/', trim($route, ':'), $routeParser)) {
-			return $routeParser;
+			return [
+				'module' => Helpers::firstUpper($routeParser['module'] ?? '*'),
+				'presenter' => Helpers::firstUpper($routeParser['presenter'] ?? '*'),
+				'action' => $routeParser['action'] ?? '*',
+			];
 		}
 
 		throw new AssetLoaderException(
