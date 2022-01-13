@@ -27,7 +27,7 @@ final class LoaderExtension extends CompilerExtension
 							'source' => Expect::string()->required(),
 							'format' => Expect::string()->required(),
 						])->castTo('array')->required(),
-					)->required()->firstIsDefault()
+					)->required()->firstIsDefault(),
 				),
 				Expect::anyOf(Expect::string()->required()),
 			),

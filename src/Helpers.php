@@ -17,7 +17,7 @@ final class Helpers
 	public static function formatRoute(
 		string $module,
 		string $presenter = 'Homepage',
-		string $action = 'default'
+		string $action = 'default',
 	): string {
 		return self::firstUpper($module) . ':' . self::firstUpper($presenter) . ':' . $action;
 	}

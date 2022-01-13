@@ -31,7 +31,7 @@ final class Api
 		array $data,
 		array $formatHeaders,
 		array $formatHtmlInjects,
-		private Minifier $minifier
+		private Minifier $minifier,
 	) {
 		$this->data = $data;
 		$this->formatHeaders = $formatHeaders;
@@ -58,10 +58,10 @@ final class Api
 			array_merge(
 				$this->renderInjectTagsByData(
 					'global-' . preg_replace('/^([^-]+)-(.*)$/', '$1', $routePath),
-					$this->findGlobalData($route)
+					$this->findGlobalData($route),
 				),
 				$this->renderInjectTagsByData($routePath, $this->findLocalData($route)),
-			)
+			),
 		);
 	}
 
@@ -80,18 +80,18 @@ final class Api
 			if (preg_match(
 				'/^global-(?<module>[a-zA-Z0-9]+)\.(?<format>[a-zA-Z0-9]+)$/',
 				$parser[1],
-				$globalRouteParser
+				$globalRouteParser,
 			)) {
 				$format = $globalRouteParser['format'];
 				$data = $this->findGlobalData($globalRouteParser['module'] . ':Homepage:default');
 			} elseif (preg_match(
 				'/^(?<module>[a-zA-Z0-9]+)-(?<presenter>[a-zA-Z0-9]+)-(?<action>[a-zA-Z0-9]+)\.(?<format>[a-zA-Z0-9]+)$/',
 				$parser[1],
-				$routeParser
+				$routeParser,
 			)) {
 				$format = $routeParser['format'];
 				$data = $this->findLocalData(
-					Helpers::formatRoute($routeParser['module'], $routeParser['presenter'], $routeParser['action'])
+					Helpers::formatRoute($routeParser['module'], $routeParser['presenter'], $routeParser['action']),
 				);
 			} else {
 				echo '/* empty body */';
@@ -169,7 +169,7 @@ final class Api
 					$return[] = str_replace(
 						'%path%',
 						($itemParser[1] === '//' ? 'https://' : $itemParser[1]) . $itemParser[2],
-						$this->formatHtmlInjects[$format]
+						$this->formatHtmlInjects[$format],
 					);
 				} elseif (
 					is_file($filePath = $this->basePath . '/' . trim($item, '/')) === true
@@ -205,7 +205,7 @@ final class Api
 				[
 					$routeParser['module'] . ':' . $routeParser['presenter'] . ':*',
 					$routeParser['module'] . ':' . $routeParser['presenter'] . ':' . $routeParser['action'],
-				]
+				],
 			);
 		}
 
@@ -223,7 +223,7 @@ final class Api
 				[
 					'*',
 					$this->parseRoute($route)['module'] . ':*',
-				]
+				],
 			);
 		}
 
