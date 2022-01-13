@@ -10,7 +10,7 @@ use Nette\Caching\Storage;
 
 final class Minifier
 {
-	/** @var AssetMinifier[] (format => service) */
+	/** @var array<string, AssetMinifier> (format => service) */
 	private array $services = [];
 
 	private ?Cache $cache = null;
@@ -28,11 +28,11 @@ final class Minifier
 
 	public function minify(string $haystack, string $format): string
 	{
-		$key = $format . '-' . md5($haystack);
+		$key = sprintf('%s-%s', $format, md5($haystack));
 		if ($this->cache !== null) {
 			$cache = $this->cache->load($key);
-			if ($cache !== null) {
-				return (string) $cache;
+			if (is_string($cache)) {
+				return $cache;
 			}
 		}
 		$return = $this->getMinifier($format)->minify($haystack);
@@ -66,9 +66,7 @@ final class Minifier
 	public function addMinifier(AssetMinifier $minifier, string $format): void
 	{
 		if (isset($this->services[$format]) === true && !$this->services[$format] instanceof $minifier) {
-			throw new \LogicException(
-				'Minifier for "' . $format . '" has been defined (' . $this->services[$format]::class . ').',
-			);
+			throw new \LogicException(sprintf('Minifier for "%s" has been defined (%s).', $format, $this->services[$format]::class));
 		}
 
 		$this->services[$format] = $minifier;

@@ -62,7 +62,7 @@ class JShrinkMinifier
 	 * Contains lock ids which are used to replace certain code patterns and
 	 * prevent them from being minified
 	 *
-	 * @var mixed[]
+	 * @var array<string, string>
 	 */
 	protected array $locks = [];
 
@@ -544,7 +544,7 @@ class JShrinkMinifier
 			return $js;
 		}
 
-		$this->locks[$lock] = $matches[2];
+		$this->locks[$lock] = (string) $matches[2];
 
 		return (string) preg_replace('/([+-])\s+([+-])/S', '$1' . $lock . '$2', $js);
 	}

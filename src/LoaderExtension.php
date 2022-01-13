@@ -40,35 +40,33 @@ final class LoaderExtension extends CompilerExtension
 
 	public function beforeCompile(): void
 	{
-		/** @var mixed[] $config */
+		/** @var array{
+		 *    basePath: string|null,
+		 *    routing: mixed[],
+		 *    base: mixed[],
+		 *    formatHeaders: array<string, string>,
+		 *    formatHtmlInjects: array<string, string>,
+		 * } $config
+		 */
 		$config = $this->getConfig();
-		$files = $config['routing'] ?? [];
-
-		if ($config['base'] !== []) {
-			$files = array_merge_recursive($files, ['*' => $config['base']]);
-		}
 
 		$assets = [];
-		foreach ($files as $route => $assetFiles) {
+		foreach ($this->formatRoutingFiles($config['routing'], $config['base']) as $route => $assetFiles) {
 			$this->validateRouteFormat($route);
 			foreach ($assetFiles as $assetFormat => $assetFile) {
 				if (is_array($assetFile)) {
-					if (isset($assetFile['format'], $assetFile['source'])) {
-						$format = $assetFile['format'];
-						$assetFile = $assetFile['source'];
-					} else {
-						throw new \RuntimeException('Invalid asset structure, expected keys "format" and "source".');
-					}
+					$format = $assetFile['format'];
+					$assetFile = $assetFile['source'];
 				} elseif (is_string($assetFormat)) {
-					if (!preg_match('/^[a-zA-Z0-9]+$/', $assetFile)) {
-						throw new \RuntimeException('Invalid asset format for file "' . $assetFormat . '", because "' . $assetFile . '" given.');
+					if (preg_match('/^[a-zA-Z0-9]+$/', $assetFile) !== 1) {
+						throw new \RuntimeException(sprintf('Invalid asset format for file "%s", because "%s" given.', $assetFormat, $assetFile));
 					}
 					$format = $assetFile;
 					$assetFile = $assetFormat;
-				} elseif (preg_match('/^(?<name>.+)\.(?<format>[a-zA-Z0-9]+)(?:\?.*)?$/', $assetFile, $fileParser)) {
+				} elseif (preg_match('/^(?<name>.+)\.(?<format>[a-zA-Z0-9]+)(?:\?.*)?$/', $assetFile, $fileParser) === 1) {
 					$format = $fileParser['format'];
 				} else {
-					throw new \RuntimeException('Invalid asset filename "' . $assetFile . '". Did you mean "' . $assetFile . '.js"?');
+					throw new \RuntimeException(sprintf('Invalid asset filename "%s". Did you mean "%s.js"?', $assetFile, $assetFile));
 				}
 				if (isset($assets[$route][$format]) === false) {
 					$assets[$route][$format] = [];
@@ -77,8 +75,8 @@ final class LoaderExtension extends CompilerExtension
 			}
 		}
 
-		foreach (($config['formatHtmlInjects'] ?? []) as $formatHtmlInject) {
-			if (!str_contains($formatHtmlInject, '%path%')) {
+		foreach ($config['formatHtmlInjects'] as $formatHtmlInject) {
+			if (str_contains($formatHtmlInject, '%path%') === false) {
 				throw new \RuntimeException('HTML inject format must contains variable "%path%", but "' . $formatHtmlInject . '" given.');
 			}
 		}
@@ -95,11 +93,11 @@ final class LoaderExtension extends CompilerExtension
 			->setArgument('formatHeaders', array_merge([
 				'js' => 'application/javascript',
 				'css' => 'text/css',
-			], $config['formatHeaders'] ?? []))
+			], $config['formatHeaders']))
 			->setArgument('formatHtmlInjects', array_merge([
 				'js' => '<script src="%path%"></script>',
 				'css' => '<link href="%path%" rel="stylesheet">',
-			], $config['formatHtmlInjects'] ?? []));
+			], $config['formatHtmlInjects']));
 	}
 
 
@@ -128,10 +126,28 @@ final class LoaderExtension extends CompilerExtension
 		}
 		if (preg_match('/^[A-Z0-9][A-Za-z0-9]*:(?:\*|[A-Z0-9][A-Za-z0-9]*:(?:\*|[a-z0-9][A-Za-z0-9]*))$/', trim($route, ':')) === 0) {
 			throw new AssetLoaderException(
-				'Route "' . $route . '" is invalid. '
+				sprintf('Route "%s" is invalid. ', $route)
 				. 'Route must be absolute "Module:Presenter:action" or end '
 				. 'with dynamic part in format "Module:*" or "Module:Presenter:*".',
 			);
 		}
+	}
+
+
+	/**
+	 * @param mixed[] $files
+	 * @param mixed[] $base
+	 * @return array<string,
+	 *     array<int, string>|array<int|string, array{format: string, source: string}>|array<string, string>
+	 * >
+	 */
+	private function formatRoutingFiles(array $files, array $base = []): array
+	{
+		if ($base !== []) {
+			$files = array_merge_recursive($files, ['*' => $base]);
+		}
+
+		/** @phpstan-ignore-next-line */
+		return $files;
 	}
 }

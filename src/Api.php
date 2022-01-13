@@ -76,19 +76,19 @@ final class Api
 	 */
 	public function run(): void
 	{
-		if (preg_match('/^assets\/web-loader\/(.+?)(?:\?v=[0-9a-f]{6})?$/', Url::get()->getRelativeUrl(), $parser)) { // 1.
+		if (preg_match('/^assets\/web-loader\/(.+?)(?:\?v=[0-9a-f]{6})?$/', Url::get()->getRelativeUrl(), $parser) === 1) { // 1.
 			if (preg_match(
 				'/^global-(?<module>[a-zA-Z0-9]+)\.(?<format>[a-zA-Z0-9]+)$/',
 				$parser[1],
 				$globalRouteParser,
-			)) {
+			) === 1) {
 				$format = $globalRouteParser['format'];
 				$data = $this->findGlobalData($globalRouteParser['module'] . ':Homepage:default');
 			} elseif (preg_match(
 				'/^(?<module>[a-zA-Z0-9]+)-(?<presenter>[a-zA-Z0-9]+)-(?<action>[a-zA-Z0-9]+)\.(?<format>[a-zA-Z0-9]+)$/',
 				$parser[1],
 				$routeParser,
-			)) {
+			) === 1) {
 				$format = $routeParser['format'];
 				$data = $this->findLocalData(
 					Helpers::formatRoute($routeParser['module'], $routeParser['presenter'], $routeParser['action']),
@@ -110,7 +110,7 @@ final class Api
 			$topModTime = 0;
 			if ($data !== []) { // 3.
 				foreach ($data[$format] ?? [] as $file) {
-					if (preg_match('~^https?://~', $file)) { // do not accept URL
+					if (preg_match('~^https?://~', $file) === 1) { // do not accept URL
 						continue;
 					}
 					$filePath = $this->basePath . '/' . trim($file, '/');
@@ -125,7 +125,7 @@ final class Api
 					}
 				}
 			}
-			$topModTime = $topModTime ?: time();
+			$topModTime = $topModTime === 0 ? time() : $topModTime;
 
 			$tsString = gmdate('D, d M Y H:i:s ', $topModTime) . 'GMT';
 			$etag = 'EN' . $topModTime;
@@ -165,7 +165,7 @@ final class Api
 		foreach (array_keys($data) as $format) {
 			$topModTime = 0;
 			foreach ($data[$format] ?? [] as $item) {
-				if (preg_match('/^((?:https?:)?\/\/)(.+)$/', $item, $itemParser)) {
+				if (preg_match('/^((?:https?:)?\/\/)(.+)$/', $item, $itemParser) === 1) {
 					$return[] = str_replace(
 						'%path%',
 						($itemParser[1] === '//' ? 'https://' : $itemParser[1]) . $itemParser[2],
@@ -182,8 +182,13 @@ final class Api
 			if (isset($this->formatHtmlInjects[$format]) === true) {
 				$return[] = str_replace(
 					'%path%',
-					Url::get()->getBaseUrl() . '/assets/web-loader/' . $route . '.' . $format
-					. ($topModTime > 0 ? '?v=' . substr(md5((string) $topModTime), 0, 6) : ''),
+					sprintf(
+						'%s/assets/web-loader/%s.%s%s',
+						Url::get()->getBaseUrl(),
+						$route,
+						$format,
+						$topModTime > 0 ? '?v=' . substr(md5((string) $topModTime), 0, 6) : '',
+					),
 					$this->formatHtmlInjects[$format],
 				);
 			}
@@ -243,12 +248,13 @@ final class Api
 			$return[] = $this->data[$selector] ?? [];
 		}
 
+		/** @phpstan-ignore-next-line */
 		return array_merge_recursive([], ...$return);
 	}
 
 
 	/**
-	 * @return string[]
+	 * @return array{module: string, presenter: string, action: string}
 	 */
 	private function parseRoute(string $route): array
 	{
@@ -259,7 +265,11 @@ final class Api
 				'action' => 'default',
 			];
 		}
-		if (preg_match('/^(?<module>[^:]+):(?<presenter>[^:]+):(?<action>[^:]+)$/', trim($route, ':'), $routeParser)) {
+		if (preg_match(
+			'/^(?<module>[^:]+):(?<presenter>[^:]+):(?<action>[^:]+)$/',
+			trim($route, ':'),
+			$routeParser,
+		) === 1) {
 			return [
 				'module' => Helpers::firstUpper($routeParser['module'] ?? '*'),
 				'presenter' => Helpers::firstUpper($routeParser['presenter'] ?? '*'),
@@ -268,7 +278,7 @@ final class Api
 		}
 
 		throw new AssetLoaderException(
-			'Route "' . $route . '" is invalid. '
+			sprintf('Route "%s" is invalid. ', $route)
 			. 'Route must be absolute "Module:Presenter:action" or end '
 			. 'with dynamic part in format "Module:*" or "Module:Presenter:*".',
 		);

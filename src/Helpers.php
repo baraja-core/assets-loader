@@ -7,10 +7,8 @@ namespace Baraja\AssetsLoader;
 
 final class Helpers
 {
-	/** @throws \Error */
-	public function __construct()
+	private function __construct()
 	{
-		throw new \Error('Class ' . static::class . ' is static and cannot be instantiated.');
 	}
 
 
@@ -28,13 +26,13 @@ final class Helpers
 		if ($route === 'Error4xx:default') {
 			return 'error4xx-default';
 		}
-		if (preg_match('/^(?<module>[^:]+):(?<presenter>[^:]+):(?<action>[^:]+)$/', $route, $parser)) {
+		if (preg_match('/^(?<module>[^:]+):(?<presenter>[^:]+):(?<action>[^:]+)$/', $route, $parser) === 1) {
 			return self::firstLower($parser['module'])
 				. '-' . self::firstLower($parser['presenter'])
 				. '-' . self::firstLower($parser['action']);
 		}
 
-		throw new \InvalidArgumentException('Can not parse route format, because haystack "' . $route . '" given.');
+		throw new \InvalidArgumentException(sprintf('Can not parse route format, because haystack "%s" given.', $route));
 	}
 
 
