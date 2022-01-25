@@ -13,7 +13,8 @@
 		"nette/di": "^3.0",
 		"nette/http": "^3.0",
 		"nette/application": "^3.0",
-		"baraja-core/url": "^1.1"
+		"baraja-core/url": "^1.1",
+		"baraja-core/path-resolvers": "^1.0"
 	},
 	"require-dev": {
 		"nette/caching": "^3.0",
