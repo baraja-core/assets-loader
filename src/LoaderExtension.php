@@ -6,6 +6,9 @@ namespace Baraja\AssetsLoader;
 
 
 use Baraja\AssetsLoader\Minifier\Minifier;
+use Baraja\PathResolvers\Resolvers\RootDirResolver;
+use Baraja\PathResolvers\Resolvers\VendorResolver;
+use Baraja\PathResolvers\Resolvers\WwwDirResolver;
 use Baraja\Url\Url;
 use Nette\Application\Application;
 use Nette\DI\CompilerExtension;
@@ -86,9 +89,20 @@ final class LoaderExtension extends CompilerExtension
 		$builder->addDefinition($this->prefix('minifier'))
 			->setFactory(Minifier::class);
 
+		if (isset($config['basePath'])) {
+			$wwwDir = rtrim($config['basePath'], '/');
+		} else {
+			$wwwDir = sprintf(
+				'%s%s%s',
+				(new WwwDirResolver(new RootDirResolver(new VendorResolver)))->get(),
+				DIRECTORY_SEPARATOR,
+				'assets',
+			);
+		}
+
 		$builder->addDefinition($this->prefix('api'))
 			->setFactory(Api::class)
-			->setArgument('basePath', rtrim($config['basePath'] ?? $builder->parameters['wwwDir'] . '/assets', '/'))
+			->setArgument('basePath', $wwwDir)
 			->setArgument('data', $assets)
 			->setArgument('formatHeaders', array_merge([
 				'js' => 'application/javascript',
