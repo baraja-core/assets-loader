@@ -544,7 +544,7 @@ class JShrinkMinifier
 			return $js;
 		}
 
-		$this->locks[$lock] = (string) $matches[2];
+		$this->locks[$lock] = $matches[2];
 
 		return (string) preg_replace('/([+-])\s+([+-])/S', '$1' . $lock . '$2', $js);
 	}
